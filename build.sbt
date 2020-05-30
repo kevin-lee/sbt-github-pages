@@ -67,7 +67,7 @@ lazy val root = (project in file("."))
   , resolvers += hedgehogRepo
   , addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
   , addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-  , libraryDependencies ++= Seq(cats, catsEffect, github4s, http4sDsl, http4sClient, effectie) ++ hedgehogLibs
+  , libraryDependencies ++= Seq(cats, catsEffect, github4s, http4sDsl, http4sClient, effectie, loggerFCatsEffect) ++ hedgehogLibs
   , testFrameworks ++= Seq(TestFramework("hedgehog.sbt.Framework"))
 
   , licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
