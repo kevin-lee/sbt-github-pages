@@ -22,8 +22,15 @@ trait GitHubPagesKeys {
   lazy val gitHubPagesRepoName: SettingKey[String] =
     settingKey[String]("The GitHub project repository name (e.g. https://github.com/OrgName/RepoName)")
 
+  lazy val gitHubPagesGitHubToken: SettingKey[Option[String]] =
+    settingKey[Option[String]](
+      "The GitHub authentication token (default: The value from environment variable 'GITHUB_TOKEN')"
+    )
+
   lazy val gitHubPagesSiteDir: SettingKey[File] =
-    settingKey[File]("The folder contains all the files to be pushed to the GitHub Pages branch specified at gitHubPagesBranch")
+    settingKey[File](
+      "The folder contains all the files to be pushed to the GitHub Pages branch specified at gitHubPagesBranch"
+    )
 
   lazy val gitHubPagesPublishCommitMessage: SettingKey[String] =
     settingKey[String](
@@ -33,6 +40,8 @@ trait GitHubPagesKeys {
     )
 
   lazy val publishToGitHubPages: TaskKey[Unit] =
-    taskKey[Unit]("Task to push the files specified at gitHubPagesSiteDir to the branch specified at gitHubPagesBranch.")
+    taskKey[Unit](
+      "Task to push the files specified at gitHubPagesSiteDir to the branch specified at gitHubPagesBranch."
+    )
 
 }
