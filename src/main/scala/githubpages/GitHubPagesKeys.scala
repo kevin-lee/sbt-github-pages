@@ -36,7 +36,7 @@ trait GitHubPagesKeys {
     settingKey[String](
       "The commit message when publish to GitHub Pages. " +
         "First, it tries to get the value from the environment variable 'GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE'. " +
-        """If not found, the default value is "Updated ${gitHubPagesBranch.value}""""
+        s"""If not found, the default value is "Updated $${gitHubPagesBranch.value}""""
     )
 
   lazy val publishToGitHubPages: TaskKey[Unit] =
