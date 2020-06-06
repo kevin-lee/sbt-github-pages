@@ -2,8 +2,6 @@ package filef
 
 import java.io.{FileNotFoundException, IOException}
 
-import errors.StackTraceToString
-
 import scala.util.control.NonFatal
 
 /**
