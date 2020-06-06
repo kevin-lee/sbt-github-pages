@@ -1,6 +1,8 @@
 package filef
 
-import java.io.{File, FileNotFoundException, IOException}
+import java.io.{FileNotFoundException, IOException}
+
+import errors.StackTraceToString
 
 import scala.util.control.NonFatal
 
@@ -12,10 +14,9 @@ sealed trait FileError
 
 object FileError {
   final case class FileNotFound private (
-    file: File,
     fileNotFoundException: FileNotFoundException
   ) extends FileError
-  private[this] object FileNotFound extends ((File, FileNotFoundException) => FileError)
+  private[this] object FileNotFound extends (FileNotFoundException => FileError)
 
   final case class Io private (ioException: IOException) extends FileError
   private[this] object Io extends (IOException => FileError)
@@ -35,9 +36,8 @@ object FileError {
   }
 
   def fileNotFound(
-    file: File,
     fileNotFoundException: FileNotFoundException
-  ): FileError = FileNotFound(file, fileNotFoundException)
+  ): FileError = FileNotFound(fileNotFoundException)
 
   def io(ioException: IOException): FileError = Io(ioException)
 
