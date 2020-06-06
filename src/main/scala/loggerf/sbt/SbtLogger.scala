@@ -14,5 +14,6 @@ final class SbtLogger(val log: Logger) extends loggerf.Logger {
 }
 
 object SbtLogger {
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
   def sbtLogger(implicit log: Logger): SbtLogger = new SbtLogger(log)
 }

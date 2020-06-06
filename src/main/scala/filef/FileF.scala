@@ -63,6 +63,7 @@ object FileF {
     bufferSize: BufferSize
   ): F[Either[FileError, Array[Byte]]] = {
 
+    @SuppressWarnings(Array("org.wartremover.warts.Equals", "org.wartremover.warts.Var", "org.wartremover.warts.While"))
     def readFile0(
       fileChannel: FileChannel,
       bufferSize: Int,
