@@ -29,8 +29,8 @@ val http4sVersion: String = "0.21.3"
 val http4sDsl: ModuleID = "org.http4s" %% "http4s-dsl" % http4sVersion
 val http4sClient: ModuleID = "org.http4s" %% "http4s-blaze-client" % http4sVersion
 
-val effectie: ModuleID = "io.kevinlee" %% "effectie-cats-effect" % "0.4.0"
-val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "0.2.0"
+val effectie: ModuleID = "io.kevinlee" %% "effectie-cats-effect" % "1.0.0"
+val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "0.3.1"
 
 lazy val root = (project in file("."))
   .settings(
