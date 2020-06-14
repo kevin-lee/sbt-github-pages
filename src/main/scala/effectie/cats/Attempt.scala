@@ -7,6 +7,7 @@ import cats.implicits._
  * @author Kevin Lee
  * @since 2020-06-07
  */
+// TODO: Replace it with Effectie later
 trait Attempt[F[_]] {
   def attempt[A, B](fb: F[B])(f: Throwable => A): F[Either[A, B]]
 }
