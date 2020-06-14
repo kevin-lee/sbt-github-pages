@@ -8,8 +8,10 @@ import cats._
 import cats.data.EitherT
 import cats.effect._
 import cats.implicits._
+
 import effectie.Effectful._
-import effectie.cats.EffectConstructor
+import effectie.cats.Attemptable._
+import effectie.cats.{Attempt, EffectConstructor}
 
 import scala.annotation.tailrec
 
@@ -20,6 +22,33 @@ import scala.annotation.tailrec
 object FileF {
 
   final case class BufferSize(bufferSize: Int) extends AnyVal
+
+  def relativePathOf[F[_]: EffectConstructor: Attempt: Monad](
+    baseDir: File,
+    file: File
+  ): F[Either[FileError, String]] =
+    (for {
+      base <- EitherT.liftF(effectOfPure(baseDir))
+      basePath <- if (base.isDirectory) EitherT {
+            val basePath = base.getCanonicalPath
+            effectOfPure(
+              if (basePath.endsWith(File.separator))
+                basePath.asRight[FileError]
+              else
+                s"$basePath${File.separator}".asRight[FileError]
+            )
+          } else
+            EitherT.leftT[F, String](FileError.notDirectory(base))
+      filePath <- EitherT(
+            attemptF(file.getCanonicalPath)(FileError.fromNonFatal)
+          )
+      relativePath <- EitherT(
+            if (filePath.startsWith(basePath))
+              effectOf(filePath.substring(basePath.length).asRight[FileError])
+            else
+              effectOfPure(FileError.notInBaseDir(baseDir, file).asLeft[String])
+          )
+    } yield relativePath).value
 
   def getAllFiles[F[_]: EffectConstructor: Monad](
     dirs: Vector[File]
@@ -80,18 +109,19 @@ object FileF {
     }
 
     val attempted = Resource.make(
-      effectOf(new FileInputStream(file))
-        .flatMap(fileInputStream =>
-          effectOf((fileInputStream, fileInputStream.getChannel()))
-        )
-    ) { case (fileInputStream, fileChannel) =>
-      effectOf(fileChannel.close()) *> effectOf(fileInputStream.close())
-    }.use { case (_, fileChannel) =>
-      for {
-        bytes <- effectOfPure(new ByteArrayOutputStream(bufferSize.bufferSize))
-        _ <- effectOf(readFile0(fileChannel, bufferSize.bufferSize, bytes))
-      } yield bytes.toByteArray
-    }.attempt
+        effectOf(new FileInputStream(file))
+          .flatMap(fileInputStream =>
+            effectOf((fileInputStream, fileInputStream.getChannel()))
+          )
+      ) { case (fileInputStream, fileChannel) =>
+        effectOf(fileChannel.close()) *> effectOf(fileInputStream.close())
+      }.use { case (_, fileChannel) =>
+        for {
+          bytes <- effectOfPure(new ByteArrayOutputStream(bufferSize.bufferSize))
+          _ <- effectOf(readFile0(fileChannel, bufferSize.bufferSize, bytes))
+        } yield bytes.toByteArray
+      }.attempt
+
     EitherT(attempted).leftMap(FileError.fromNonFatal).value
   }
 }
