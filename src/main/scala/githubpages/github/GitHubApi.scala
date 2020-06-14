@@ -122,7 +122,7 @@ object GitHubApi {
       headers: Map[String, String]
     ): EitherT[F, GitHubError, TreeData] =
       for {
-        githubWithRateLimit <- eitherTLiftF(githubWithAbuseRateLimit(github))
+        githubWithRateLimit <- eitherTRightF(githubWithAbuseRateLimit(github))
         response <- EitherT(
           processResponse(
             githubWithRateLimit.gitData.createBlob(
@@ -148,7 +148,7 @@ object GitHubApi {
       headers: Map[String, String]
     ): EitherT[F, GitHubError, TreeData] =
       if (isBlob(file, bytes))
-        eitherTLiftEffectOfPure[F, GitHubError, TreeData](
+        eitherTRightPure[F, GitHubError](
           TreeDataBlob(filePath, blobMode, blobType, new String(bytes))
         )
       else
@@ -183,7 +183,7 @@ object GitHubApi {
     headers: Map[String, String]
   ): EitherT[F, GitHubError, TreeResult] =
     for {
-      githubWithRateLimit <- eitherTLiftF(githubWithAbuseRateLimit(github))
+      githubWithRateLimit <- eitherTRightF(githubWithAbuseRateLimit(github))
       response <- EitherT(
           processResponse(
             githubWithRateLimit.gitData.createTree(gitHubRepo.org.org, gitHubRepo.repo.repo, baseTreeSha, treeData, headers)
@@ -231,7 +231,7 @@ object GitHubApi {
       parentCommitSha <- commitSha.fold(
           fetchHeadCommit(github, commitInfo.gitHubRepo, commitInfo.branch, headers)
             .map(ref => Data.CommitSha(ref.`object`.sha))
-        )(sha => eitherTLiftEffectOfPure[F, GitHubError, Data.CommitSha](sha))
+        )(sha => eitherTRightPure[F, GitHubError](sha))
       maybeBaseTreeCommit <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
       maybeBaseTreeCommitSha = maybeBaseTreeCommit.map(_.tree.sha)
       treeDataList <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isBlob, headers)
