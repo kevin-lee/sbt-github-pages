@@ -74,7 +74,7 @@ object GitHubPagesPlugin extends AutoPlugin {
               )(
                 err => error(GitHubError.render(err)),
                 files => info(
-                    s"""The following allDirs will be pushed to '$gitHubPagesBranch' branch.
+                    s"""The following allDirs will be pushed to '${gitHubPagesBranch.gitHubPagesBranch}' branch.
                        |${files.mkString("  - ", "\n  - ", "")}
                        |""".stripMargin
                   )
@@ -140,9 +140,10 @@ object GitHubPagesPlugin extends AutoPlugin {
             commitMessage <- IO.pure(commitMessage)
             _ <- IO(
                 log.info(
-                  s"""Committing files from ${siteDir.siteDir.getCanonicalPath} into the branch to publish GitHub Pages (i.e. '${gitHubPagesPublishBranch.gitHubPagesBranch}')
-                     | * repo: ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}
-                     | * commit-message: $commitMessage
+                  s"""Committing files from ${siteDir.siteDir.getCanonicalPath}
+                     |  into the branch to publish GitHub Pages (i.e. '${gitHubPagesPublishBranch.gitHubPagesBranch}')
+                     |  * repo: ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}
+                     |  * commit-message: ${commitMessage.commitMessage}
                      |""".stripMargin
                 )
               )
