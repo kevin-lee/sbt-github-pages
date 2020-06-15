@@ -58,7 +58,7 @@ object Data {
   final case class BlobConfig(acceptedExtensions: Set[String], maxLength: Int)
 
 
-  final case class IsBlob(blobConfig: BlobConfig) extends ((File, Array[Byte]) => Boolean) {
+  final case class IsText(blobConfig: BlobConfig) extends ((File, Array[Byte]) => Boolean) {
 
     override def apply(file: File, bytes: Array[Byte]): Boolean =
       blobConfig.acceptedExtensions.exists(
@@ -66,12 +66,13 @@ object Data {
       ) &&
         bytes.length < blobConfig.maxLength
 
-    override def toString(): String =
-      s"""${super.toString()}
-         |A function to determine if the given file with the bytes can be a blob.
-         |It is a blob if the follow two conditions are met.
-         |  - The filename ends with one of these extensions. ${blobConfig.acceptedExtensions.mkString("[", ",", "]")}
-         |  - the length of the bytes (Array[Byte]) is less than ${blobConfig.maxLength}
+    override lazy val toString: String =
+      s"""${scala.runtime.ScalaRunTime._toString(this)}
+         |  A function to determine if the given file with the bytes
+         |  can be a text based blob when committing.
+         |  It is a text one if the follow two conditions are met.
+         |    - The filename ends with one of these extensions. ${blobConfig.acceptedExtensions.mkString("[", ",", "]")}
+         |    - the byte length (Array[Byte].length) of the file is less than ${blobConfig.maxLength}
          |""".stripMargin
 
   }
