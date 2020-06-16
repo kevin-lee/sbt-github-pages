@@ -6,7 +6,7 @@ import sbt.ScmInfo
 val ProjectScalaVersion: String = "2.12.11"
 val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
-val GlobalSbtVersion: String = "1.3.10"
+val GlobalSbtVersion: String = "1.3.12"
 
 val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
@@ -33,6 +33,7 @@ val effectie: ModuleID = "io.kevinlee" %% "effectie-cats-effect" % "1.0.0"
 val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "0.3.1"
 
 lazy val root = (project in file("."))
+  .enablePlugins(DevOopsGitReleasePlugin)
   .settings(
     organization := "io.kevinlee"
   , name         := "sbt-github-pages"
@@ -70,12 +71,18 @@ lazy val root = (project in file("."))
   , libraryDependencies ++= Seq(cats, catsEffect, github4s, http4sDsl, http4sClient, effectie, loggerFCatsEffect) ++ hedgehogLibs
   , testFrameworks ++= Seq(TestFramework("hedgehog.sbt.Framework"))
 
-  , licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+  /* GitHub Release { */
+  , artifactsRequiredForGitHubRelease := false
+  , devOopsPackagedArtifacts := List.empty[String]
+  /* } GitHub Release */
+  /* Publish { */
   , publishMavenStyle := false
+  , licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
   , bintrayPackageLabels := Seq("sbt", "plugin")
-  , bintrayVcsUrl := Some("""git@github.com:Kevin-Lee/sbt-github-pages.git""")
+  , bintrayVcsUrl := Some("""https://github.com/Kevin-Lee/sbt-github-pages""")
   , bintrayRepository := "sbt-plugins"
+  /* } Publish */
 
 
 )
