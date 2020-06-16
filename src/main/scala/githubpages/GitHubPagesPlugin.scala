@@ -5,7 +5,7 @@ import cats.effect.{ConcurrentEffect, ContextShift, IO, Timer, Sync => CatsSync}
 import cats.implicits._
 
 import effectie.cats.EitherTSupport._
-import effectie.cats.{Attempt, EffectConstructor}
+import effectie.cats.{CanCatch, EffectConstructor}
 
 import filef.FileF
 
@@ -38,7 +38,7 @@ object GitHubPagesPlugin extends AutoPlugin {
   object autoImport extends GitHubPagesKeys
   import autoImport._
 
-  private def pushToGhPages[F[_]: EffectConstructor: Attempt: CatsSync: ConcurrentEffect: Timer: LogF](
+  private def pushToGhPages[F[_]: EffectConstructor: CanCatch: CatsSync: ConcurrentEffect: Timer: LogF](
     client: Client[F],
     gitHubRepo: Data.GitHubRepoWithAuth,
     gitHubPagesBranch: Data.GitHubPagesBranch,
