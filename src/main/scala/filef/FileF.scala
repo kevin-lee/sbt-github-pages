@@ -8,10 +8,9 @@ import cats._
 import cats.data.EitherT
 import cats.effect._
 import cats.implicits._
-
 import effectie.Effectful._
-import effectie.cats.Attemptable._
-import effectie.cats.{Attempt, EffectConstructor}
+import effectie.cats.Catching._
+import effectie.cats.{CanCatch, EffectConstructor}
 
 import scala.annotation.tailrec
 
@@ -23,7 +22,7 @@ object FileF {
 
   final case class BufferSize(bufferSize: Int) extends AnyVal
 
-  def relativePathOf[F[_]: EffectConstructor: Attempt: Monad](
+  def relativePathOf[F[_]: EffectConstructor: CanCatch: Monad](
     baseDir: File,
     file: File
   ): F[Either[FileError, String]] =
@@ -40,7 +39,7 @@ object FileF {
           } else
             EitherT.leftT[F, String](FileError.notDirectory(base))
       filePath <- EitherT(
-            attemptF(file.getCanonicalPath)(FileError.fromNonFatal)
+            catchNonFatalF(file.getCanonicalPath)(FileError.fromNonFatal)
           )
       relativePath <- EitherT(
             if (filePath.startsWith(basePath))

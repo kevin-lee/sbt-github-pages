@@ -8,7 +8,7 @@ import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{ConcurrentEffect, Timer}
 import cats.implicits._
 import effectie.cats.EitherTSupport._
-import effectie.cats.{Attempt, EffectConstructor}
+import effectie.cats.{CanCatch, EffectConstructor}
 import filef.FileF
 import github4s.domain._
 import github4s.{GHResponse, Github}
@@ -105,7 +105,7 @@ object GitHubApi {
       ).map(Option(_))
     )
 
-  private def createTreeDataList[F[_]: EffectConstructor: Attempt: Monad: ConcurrentEffect: Timer](
+  private def createTreeDataList[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     baseDir: Data.BaseDir,
@@ -218,7 +218,7 @@ object GitHubApi {
       )
     } yield response
 
-  private def updateCommitDir[F[_]: EffectConstructor: Attempt: Monad: ConcurrentEffect: Timer](
+  private def updateCommitDir[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer](
     github: Github[F],
     commitInfo: CommitInfo,
     baseDir: Data.BaseDir,
@@ -242,7 +242,7 @@ object GitHubApi {
     } yield refCommit
 
 
-  def commitAndPush[F[_]: EffectConstructor: Attempt: Monad: ConcurrentEffect: Timer](
+  def commitAndPush[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer](
     client: Client[F],
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
     branch: Data.Branch,
