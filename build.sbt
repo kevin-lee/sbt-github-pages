@@ -72,6 +72,7 @@ lazy val root = (project in file("."))
   , testFrameworks ++= Seq(TestFramework("hedgehog.sbt.Framework"))
 
   /* GitHub Release { */
+  , gitTagFrom := "main"
   , artifactsRequiredForGitHubRelease := false
   , devOopsPackagedArtifacts := List.empty[String]
   /* } GitHub Release */
