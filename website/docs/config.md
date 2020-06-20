@@ -29,9 +29,9 @@ lazy val root = (project in file("."))
 
 ### GitHub Pages Branch
 
-| Name                | Type | Value Type | Default    |
-| --------------------| ---- | ---------- | ---------- |
-| `gitHubPagesBranch` | Key  | `String`   | `gh-pages` |
+| Name                | Value Type | Default    |
+| --------------------| ---------- | ---------- |
+| `gitHubPagesBranch` | `String`   | `gh-pages` |
 
 A setting key to set the GitHub Pages branch. By default, it's `gh-pages` but if your project repos uses a different branch you can set it up using this key.
 
@@ -41,9 +41,9 @@ gitHubPagesBranch := "main"
 ````
 
 ### NoJekyll
-| Name                  | Type | Value Type | Default    |
-| --------------------- | ---- | ---------- | ---------- |
-| `gitHubPagesNoJekyll` | Key  | `Boolean`  | `true`     |
+| Name                  | Value Type | Default    |
+| --------------------- | ---------- | ---------- |
+| `gitHubPagesNoJekyll` | `Boolean`  | `true`     |
 
 The flag to decide whether to add `.nojekyll`.
 
@@ -63,9 +63,9 @@ gitHubPagesNoJekyll := false
 This key must be set by the user of this plugin.
 :::
 
-| Name                 | Type | Value Type | Default    |
-| -------------------- | ---- | ---------- | ---------- |
-| `gitHubPagesOrgName` | Key  | `Boolean`  |            |
+| Name                 | Value Type | Default    |
+| -------------------- | ---------- | ---------- |
+| `gitHubPagesOrgName` | `Boolean`  |            |
 
 The GitHub organization name (or username) (i.e.`OrgName` from `https://github.com/OrgName/RepoName`)
 
@@ -81,9 +81,9 @@ gitHubPagesOrgName := "Kevin-Lee"
 This key must be set by the user of this plugin.
 :::
 
-| Name                  | Type | Value Type | Default    |
-| --------------------- | ---- | ---------- | ---------- |
-| `gitHubPagesRepoName` | Key  | `Boolean`  |            |
+| Name                  | Value Type | Default    |
+| --------------------- | ---------- | ---------- |
+| `gitHubPagesRepoName` | `Boolean`  |            |
 
 The GitHub project repository name (i.e. `RepoName` from `https://github.com/OrgName/RepoName`)
 
@@ -94,9 +94,9 @@ gitHubPagesRepoName := "sbt-github-pages"
 
 
 ### GitHubToken
-| Name                     | Type | Value Type       | Default                       |
-| ------------------------ | ---- | ---------------- | ----------------------------- |
-| `gitHubPagesGitHubToken` | Key  | `Option[String]` | `sys.env.get("GITHUB_TOKEN")` |
+| Name                     | Value Type       | Default                       |
+| ------------------------ | ---------------- | ----------------------------- |
+| `gitHubPagesGitHubToken` | `Option[String]` | `sys.env.get("GITHUB_TOKEN")` |
 
 :::warning
 DO NOT set the actual GitHub auth token here.
@@ -142,9 +142,9 @@ DO NOT set the actual GitHub auth token here.
 This key must be set by the user of this plugin.
 :::
 
-| Name                 | Type | Value Type | Default                       |
-| -------------------- | ---- | ---------- | ----------------------------- |
-| `gitHubPagesSiteDir` | Key  | `File`     |                               |
+| Name                 | Value Type | Default                       |
+| -------------------- | ---------- | ----------------------------- |
+| `gitHubPagesSiteDir` | `File`     |                               |
 
 The folder contains all the files to be pushed to the GitHub Pages branch specified at `gitHubPagesBranch`.
 
@@ -167,9 +167,9 @@ gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
 
 
 ### Dirs To Ignore
-| Name                      | Type | Value Type    | Default                          |
-| ------------------------- | ---- | ------------- | -------------------------------- |
-| `gitHubPagesDirsToIgnore` | Key  | `Set[String]` | `Set("target", "bin", "output")` |
+| Name                      | Value Type    | Default                          |
+| ------------------------- | ------------- | -------------------------------- |
+| `gitHubPagesDirsToIgnore` | `Set[String]` | `Set("target", "bin", "output")` |
 
 A list of directory names to be ignored when committing to the GitHub Pages branch.
 
@@ -180,9 +180,9 @@ gitHubPagesDirsToIgnore := Set("node_modules", "build", "output")
 
 
 ### Ignore Dot Dirs
-| Name                       | Type | Value Type    | Default                          |
-| -------------------------- | ---- | ------------- | -------------------------------- |
-| `gitHubPagesIgnoreDotDirs` | Key  | `Boolean`     | `true`                           |
+| Name                       | Value Type    | Default                          |
+| -------------------------- | ------------- | -------------------------------- |
+| `gitHubPagesIgnoreDotDirs` | `Boolean`     | `true`                           |
 A flag to indicate whether to ignore or not dot directories when committing to the GitHub Pages branch.
 
 e.g.) To include all the dot dirs like `.cache`, `.github`, `.idea`, etc., set it to `false`.
@@ -192,9 +192,9 @@ gitHubPagesIgnoreDotDirs := false
 
 
 ### Accepted Text Extensions
-| Name                                | Type | Value Type    | Default                                                                |
-| ----------------------------------- | ---- | ------------- | ---------------------------------------------------------------------- |
-| `gitHubPagesAcceptedTextExtensions` | Key  | `Set[String]` | `Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")` |
+| Name                                | Value Type    | Default                                                                |
+| ----------------------------------- | ------------- | ---------------------------------------------------------------------- |
+| `gitHubPagesAcceptedTextExtensions` | `Set[String]` | `Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")` |
 
 Accepted text files to create `UTF-8` encoded `String` based blob. 
 If the file's extension is not one of these, `Base64` encoded blob is created.
@@ -211,9 +211,9 @@ gitHubPagesAcceptedTextExtensions :=
 ```
 
 ### Accepted Text MaxLength
-| Name                                | Type | Value Type | Default |
-| ----------------------------------- | ---- | ---------- | ------- |
-| `gitHubPagesAcceptedTextMaxLength`  | Key  | `Int`      | `4048`  |
+| Name                                | Value Type | Default |
+| ----------------------------------- | ---------- | ------- |
+| `gitHubPagesAcceptedTextMaxLength`  | `Int`      | `4048`  |
 
 The max length of the bytes (`Array[Byte]`) of the file to commit. 
 If the file byte size is greater than this, `Base64` encoded blob is created.
@@ -224,9 +224,9 @@ gitHubPagesAcceptedTextMaxLength := 6144
 ```
 
 ### Publish Commit Message
-| Name                               | Type | Value Type | Default                                                                               |
-| ---------------------------------- | ---- | ---------- | ------------------------------------------------------------------------------------- |
-| `gitHubPagesPublishCommitMessage`  | Key  | `String`   | ENV VAR `GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE` or `Updated ${gitHubPagesBranch.value}` |
+| Name                               | Value Type | Default                                                                               |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `gitHubPagesPublishCommitMessage`  | `String`   | ENV VAR `GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE` or `Updated ${gitHubPagesBranch.value}` |
 
 The commit message when publish to GitHub Pages. 
 
