@@ -10,8 +10,8 @@ const isSearchable = !isEmptyObject(algoliaConfig)
 const websiteConfig = {
   title: 'sbt-github-pages',
   tagline: 'Publish GitHub Pages with minimum effort',
-  url: 'https://kevin-lee.github.io/sbt-github-pages',
-  baseUrl: '/',
+  url: 'https://kevin-lee.github.io',
+  baseUrl: '/sbt-github-pages/',
   favicon: 'img/favicon.ico',
   organizationName: 'Kevin-Lee', // Usually your GitHub org/user name.
   projectName: 'sbt-github-pages', // Usually your repo name.
