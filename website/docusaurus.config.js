@@ -12,7 +12,7 @@ const websiteConfig = {
   tagline: 'Publish GitHub Pages with minimum effort',
   url: 'https://kevin-lee.github.io',
   baseUrl: '/sbt-github-pages/',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
   organizationName: 'Kevin-Lee', // Usually your GitHub org/user name.
   projectName: 'sbt-github-pages', // Usually your repo name.
   themeConfig: {
@@ -23,7 +23,7 @@ const websiteConfig = {
       title: 'sbt-github-pages',
       logo: {
         alt: 'sbt-github-pages Logo',
-        src: 'img/logo.svg',
+        src: 'img/sbt-github-pages-logo-32x32.png',
       },
       links: [
         {
