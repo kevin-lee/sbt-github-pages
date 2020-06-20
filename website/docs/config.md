@@ -25,37 +25,6 @@ lazy val root = (project in file("."))
   )
 ```
 
-## More Settings
-
-### GitHub Pages Branch
-
-| Name                | Value Type | Default    |
-| --------------------| ---------- | ---------- |
-| `gitHubPagesBranch` | `String`   | `gh-pages` |
-
-A setting key to set the GitHub Pages branch. By default, it's `gh-pages` but if your project repos uses a different branch you can set it up using this key.
-
-e.g.) If you want to use `main` branch instead of `gh-pages`,
-````scala
-gitHubPagesBranch := "main"
-````
-
-### NoJekyll
-| Name                  | Value Type | Default    |
-| --------------------- | ---------- | ---------- |
-| `gitHubPagesNoJekyll` | `Boolean`  | `true`     |
-
-The flag to decide whether to add `.nojekyll`.
-
-GitHub Pages, by default, uses Jekyll to generate a static website. However, `sbt-github-pages` is designed to publish a ready to go website to GitHub Pages. So it's necessary to tell GitHub Pages not to use Jeklly and ask to use whatever is sent to the GitHub Pages branch as is. It can be done by placing a `.nojekyll` file.
-
-If you want GitHub Pages to use Jekyll and generate a static website, set `gitHubPagesNoJekyll` to `false`.
-
-e.g.) Let GitHub Pages use Jekyll to generate a website.
-```scala
-gitHubPagesNoJekyll := false
-```
-
 
 ### GitHub Org Name / Username *
 
@@ -90,6 +59,68 @@ The GitHub project repository name (i.e. `RepoName` from `https://github.com/Org
 e.g.)
 ```scala
 gitHubPagesRepoName := "sbt-github-pages"
+```
+
+
+### Site Dir *
+
+:::important
+This key must be set by the user of this plugin.
+:::
+
+| Name                 | Value Type | Default                       |
+| -------------------- | ---------- | ----------------------------- |
+| `gitHubPagesSiteDir` | `File`     |                               |
+
+The folder contains all the files to be pushed to the GitHub Pages branch specified at `gitHubPagesBranch`.
+
+e.g.)
+
+Project structure
+```
+Project
+Root ─┬─ dirA
+      ├─ dirB
+      └─ website─┬─ dirC
+                 ├─ dirD
+                 ├─ build <== Contains website files
+                 └─ node_modules
+```
+
+```scala
+gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
+```
+
+## More Settings
+
+
+### GitHub Pages Branch
+
+| Name                | Value Type | Default    |
+| --------------------| ---------- | ---------- |
+| `gitHubPagesBranch` | `String`   | `gh-pages` |
+
+A setting key to set the GitHub Pages branch. By default, it's `gh-pages` but if your project repos uses a different branch you can set it up using this key.
+
+e.g.) If you want to use `main` branch instead of `gh-pages`,
+````scala
+gitHubPagesBranch := "main"
+````
+
+### NoJekyll
+| Name                  | Value Type | Default    |
+| --------------------- | ---------- | ---------- |
+| `gitHubPagesNoJekyll` | `Boolean`  | `true`     |
+
+The flag to decide whether to add `.nojekyll`.
+
+GitHub Pages, by default, uses Jekyll to generate a static website. However, `sbt-github-pages` is designed to publish a ready to go website to GitHub Pages. So it's necessary to tell GitHub Pages not to use Jeklly and ask to use whatever is sent to the GitHub Pages branch as is. It can be done by placing a `.nojekyll` file.
+
+If you want GitHub Pages to use Jekyll and generate a static website, set `gitHubPagesNoJekyll` to `false`.
+
+e.g.) Let GitHub Pages use Jekyll to generate a website.
+```scala
+gitHubPagesNoJekyll := false
 ```
 
 
@@ -135,35 +166,6 @@ gitHubPagesGitHubToken := sys.env.get("SOME_OTHER_VAR")
 :::warning
 DO NOT set the actual GitHub auth token here.
 :::
-
-### Site Dir *
-
-:::important
-This key must be set by the user of this plugin.
-:::
-
-| Name                 | Value Type | Default                       |
-| -------------------- | ---------- | ----------------------------- |
-| `gitHubPagesSiteDir` | `File`     |                               |
-
-The folder contains all the files to be pushed to the GitHub Pages branch specified at `gitHubPagesBranch`.
-
-e.g.)
-
-Project structure
-```
-Project
-Root ─┬─ dirA
-      ├─ dirB
-      └─ website─┬─ dirC
-                 ├─ dirD
-                 ├─ build <== Contains website files
-                 └─ node_modules
-```
-
-```scala
-gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
-```
 
 
 ### Dirs To Ignore
