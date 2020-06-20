@@ -4,7 +4,6 @@ import ProjectInfo._
 import kevinlee.sbt.SbtCommon._
 import just.semver.SemVer
 import sbt.ScmInfo
-
 import sbt.io.{IO => SbtIo}
 import _root_.cats.effect.IO
 
@@ -97,6 +96,7 @@ lazy val root = (project in file("."))
   , gitHubPagesOrgName := "Kevin-Lee"
   , gitHubPagesRepoName := "sbt-github-pages"
   , gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
+  , gitHubPagesAcceptedTextExtensions += ".js"
 
   , prepareDocusaurusBuild := Def.taskDyn {
       val algoliaConfigFileName = sys.env.getOrElse("ALGOLIA_CONFIG_FILENAME", "algolia.config.json")

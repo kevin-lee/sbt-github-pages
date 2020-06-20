@@ -1,5 +1,5 @@
 module.exports = {
   someSidebar: {
-    'sbt-github-pages': ['getting-started', 'config', 'run'],
+    'sbt-github-pages': ['getting-started', 'config', 'run', 'examples'],
   },
 };
