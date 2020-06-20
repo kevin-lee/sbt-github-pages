@@ -25,8 +25,225 @@ lazy val root = (project in file("."))
   )
 ```
 
-:::note
+## More Settings
 
-Documentation Work in Progress
+### GitHub Pages Branch
 
+| Name                | Type | Value Type | Default    |
+| --------------------| ---- | ---------- | ---------- |
+| `gitHubPagesBranch` | Key  | `String`   | `gh-pages` |
+
+A setting key to set the GitHub Pages branch. By default, it's `gh-pages` but if your project repos uses a different branch you can set it up using this key.
+
+e.g.) If you want to use `main` branch instead of `gh-pages`,
+````scala
+gitHubPagesBranch := "main"
+````
+
+### NoJekyll
+| Name                  | Type | Value Type | Default    |
+| --------------------- | ---- | ---------- | ---------- |
+| `gitHubPagesNoJekyll` | Key  | `Boolean`  | `true`     |
+
+The flag to decide whether to add `.nojekyll`.
+
+GitHub Pages, by default, uses Jekyll to generate a static website. However, `sbt-github-pages` is designed to publish a ready to go website to GitHub Pages. So it's necessary to tell GitHub Pages not to use Jeklly and ask to use whatever is sent to the GitHub Pages branch as is. It can be done by placing a `.nojekyll` file.
+
+If you want GitHub Pages to use Jekyll and generate a static website, set `gitHubPagesNoJekyll` to `false`.
+
+e.g.) Let GitHub Pages use Jekyll to generate a website.
+```scala
+gitHubPagesNoJekyll := false
+```
+
+
+### GitHub Org Name / Username *
+
+:::important
+This key must be set by the user of this plugin.
 :::
+
+| Name                 | Type | Value Type | Default    |
+| -------------------- | ---- | ---------- | ---------- |
+| `gitHubPagesOrgName` | Key  | `Boolean`  |            |
+
+The GitHub organization name (or username) (i.e.`OrgName` from `https://github.com/OrgName/RepoName`)
+
+e.g.)
+```scala
+gitHubPagesOrgName := "Kevin-Lee"
+```
+
+
+### GitHub Repo Name *
+
+:::important
+This key must be set by the user of this plugin.
+:::
+
+| Name                  | Type | Value Type | Default    |
+| --------------------- | ---- | ---------- | ---------- |
+| `gitHubPagesRepoName` | Key  | `Boolean`  |            |
+
+The GitHub project repository name (i.e. `RepoName` from `https://github.com/OrgName/RepoName`)
+
+e.g.)
+```scala
+gitHubPagesRepoName := "sbt-github-pages"
+```
+
+
+### GitHubToken
+| Name                     | Type | Value Type       | Default                       |
+| ------------------------ | ---- | ---------------- | ----------------------------- |
+| `gitHubPagesGitHubToken` | Key  | `Option[String]` | `sys.env.get("GITHUB_TOKEN")` |
+
+:::warning
+DO NOT set the actual GitHub auth token here.
+:::
+
+The GitHub authentication token (default: The value from environment variable `GITHUB_TOKEN`)
+If you're using GitHub Actions to publish, you don't need to set it up at all.
+GitHub provides the GitHub token in GitHub Actions build so you can just use it.
+
+e.g.)
+In your GitHub Actions config yml file,
+```yml
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+# ...
+
+      - name: Publish website
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "> Publish GitHub Pages"
+          sbt publishToGitHubPages
+```
+
+e.g.) If you want to change it,
+```scala
+gitHubPagesGitHubToken := sys.env.get("SOME_OTHER_VAR")
+```
+
+:::warning
+DO NOT set the actual GitHub auth token here.
+:::
+
+### Site Dir *
+
+:::important
+This key must be set by the user of this plugin.
+:::
+
+| Name                 | Type | Value Type | Default                       |
+| -------------------- | ---- | ---------- | ----------------------------- |
+| `gitHubPagesSiteDir` | Key  | `File`     |                               |
+
+The folder contains all the files to be pushed to the GitHub Pages branch specified at `gitHubPagesBranch`.
+
+e.g.)
+
+Project structure
+```
+Project
+Root ─┬─ dirA
+      ├─ dirB
+      └─ website─┬─ dirC
+                 ├─ dirD
+                 ├─ build <== Contains website files
+                 └─ node_modules
+```
+
+```scala
+gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
+```
+
+
+### Dirs To Ignore
+| Name                      | Type | Value Type    | Default                          |
+| ------------------------- | ---- | ------------- | -------------------------------- |
+| `gitHubPagesDirsToIgnore` | Key  | `Set[String]` | `Set("target", "bin", "output")` |
+
+A list of directory names to be ignored when committing to the GitHub Pages branch.
+
+e.g.) You add more or remove some.
+```scala
+gitHubPagesDirsToIgnore := Set("node_modules", "build", "output")
+```
+
+
+### Ignore Dot Dirs
+| Name                       | Type | Value Type    | Default                          |
+| -------------------------- | ---- | ------------- | -------------------------------- |
+| `gitHubPagesIgnoreDotDirs` | Key  | `Boolean`     | `true`                           |
+A flag to indicate whether to ignore or not dot directories when committing to the GitHub Pages branch.
+
+e.g.) To include all the dot dirs like `.cache`, `.github`, `.idea`, etc., set it to `false`.
+```scala
+gitHubPagesIgnoreDotDirs := false
+```
+
+
+### Accepted Text Extensions
+| Name                                | Type | Value Type    | Default                                                                |
+| ----------------------------------- | ---- | ------------- | ---------------------------------------------------------------------- |
+| `gitHubPagesAcceptedTextExtensions` | Key  | `Set[String]` | `Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")` |
+
+Accepted text files to create `UTF-8` encoded `String` based blob. 
+If the file's extension is not one of these, `Base64` encoded blob is created.
+
+Default:
+```scala
+Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")
+```
+
+e.g.) You add more or remove some.
+```scala
+gitHubPagesAcceptedTextExtensions :=
+  Set(".json", ".js", ".css", ".html", ".md", ".txt")
+```
+
+### Accepted Text MaxLength
+| Name                                | Type | Value Type | Default |
+| ----------------------------------- | ---- | ---------- | ------- |
+| `gitHubPagesAcceptedTextMaxLength`  | Key  | `Int`      | `4048`  |
+
+The max length of the bytes (`Array[Byte]`) of the file to commit. 
+If the file byte size is greater than this, `Base64` encoded blob is created.
+
+e.g.) You can make it bigger.
+```scala
+gitHubPagesAcceptedTextMaxLength := 6144
+```
+
+### Publish Commit Message
+| Name                               | Type | Value Type | Default                                                                               |
+| ---------------------------------- | ---- | ---------- | ------------------------------------------------------------------------------------- |
+| `gitHubPagesPublishCommitMessage`  | Key  | `String`   | ENV VAR `GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE` or `Updated ${gitHubPagesBranch.value}` |
+
+The commit message when publish to GitHub Pages. 
+
+First, it tries to get the value from the environment variable `GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE`. 
+If not found, the default value is `s"Updated ${gitHubPagesBranch.value}"`
+
+Default:
+```scala
+gitHubPagesPublishCommitMessage :=
+  sys.env.getOrElse(
+    "GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE",
+    s"Updated ${gitHubPagesBranch.value}"
+  )
+```
+
+e.g.) If you want to have a different message, you can change it.
+```scala
+gitHubPagesPublishCommitMessage := s"New stuff in my awesome website!!!"
+```
+
