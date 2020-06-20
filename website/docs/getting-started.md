@@ -4,7 +4,7 @@ title: Getting Started
 sidebar_label: Getting Started
 ---
 
-## sbt-github-pages
+## ![](../img/sbt-github-pages-logo-64x64.png) sbt-github-pages
 sbt plugin to publish GitHub Pages with minimum effort.
 
 [![Build Status](https://github.com/Kevin-Lee/sbt-github-pages/workflows/Build%20All/badge.svg)](https://github.com/Kevin-Lee/sbt-github-pages/actions?workflow=Build+All)
