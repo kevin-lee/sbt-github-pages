@@ -18,8 +18,18 @@ In the `project/plugins.sbt`, add the following line,
 addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.1.0")
 ```
 
+## Why sbt-github-pages?
+
+So why `sbt-github-pages`? There's already the sbt plugin called [`sbt-ghpages`](https://github.com/sbt/sbt-ghpages) which does the same thing.
+
+If you're using `sbt-ghpages`, that's good and you don't need to change it at all. `sbt-ghpages` is a great sbt plugin.
+
+Difference between `sbt-github-pages` and `sbt-ghpages` is that `sbt-github-pages` uses GitHub API to push whereas `sbt-ghpages` uses `git` to push.
+
+So to use `sbt-github-pages`, the only requirement is GitHub API access token which means you don't need to set anything if you're using GitHub Actions to publish since GitHub provides the access token in GitHub Actions build.
+
 :::note
 
-Documentation Work in Progress
+So `sbt-github-pages` works well with GitHub Actions.
 
 :::
