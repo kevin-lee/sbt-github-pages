@@ -30,11 +30,6 @@ const websiteConfig = {
           to: 'docs/',
           activeBasePath: 'docs',
           label: 'Docs',
-          position: 'left',
-        },
-        {
-          href: 'https://github.com/Kevin-Lee/sbt-github-pages',
-          label: 'GitHub',
           position: 'right',
         },
       ],

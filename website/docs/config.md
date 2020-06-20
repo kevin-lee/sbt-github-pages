@@ -129,8 +129,9 @@ gitHubPagesNoJekyll := false
 | ------------------------ | ---------------- | ----------------------------- |
 | `gitHubPagesGitHubToken` | `Option[String]` | `sys.env.get("GITHUB_TOKEN")` |
 
-:::warning
-DO NOT set the actual GitHub auth token here.
+:::danger Warning!!!
+DO NOT hard-code the actual GitHub auth token String here.
+Use an environment variable instead.
 :::
 
 The GitHub authentication token (default: The value from environment variable `GITHUB_TOKEN`)
@@ -163,8 +164,9 @@ e.g.) If you want to change it,
 gitHubPagesGitHubToken := sys.env.get("SOME_OTHER_VAR")
 ```
 
-:::warning
-DO NOT set the actual GitHub auth token here.
+:::danger Warning!!!
+DO NOT hard-code the actual GitHub auth token String here.
+Use an environment variable instead.
 :::
 
 
