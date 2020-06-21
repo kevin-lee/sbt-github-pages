@@ -32,8 +32,8 @@ object GitHubApi {
   val blobType: String = "blob"
 
   val defaultTextExtensions: Set[String] =
-    Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")
-  val defaultMaximumLength: Int = 4048
+    Set(".md", ".css", ".html", ".xml", ".js", ".txt")
+  val defaultMaximumLength: Int = 10240
 
   val defaultBlobConfig: Data.BlobConfig = Data.BlobConfig(defaultTextExtensions, defaultMaximumLength)
 
