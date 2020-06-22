@@ -5,4 +5,4 @@ sbt plugin to publish GitHub Pages with minimum effort. It works well with GitHu
 [![Release Status](https://github.com/Kevin-Lee/sbt-github-pages/workflows/Release/badge.svg)](https://github.com/Kevin-Lee/sbt-github-pages/actions?workflow=Release)
 [ ![Download](https://api.bintray.com/packages/kevinlee/sbt-plugins/sbt-github-pages/images/download.svg) ](https://bintray.com/kevinlee/sbt-plugins/sbt-github-pages/_latestVersion)
 
-# Please visit [https://kevin-lee.github.io/sbt-github-pages](https://kevin-lee.github.io/sbt-github-pages)
+# Please visit <br> [https://kevin-lee.github.io/sbt-github-pages](https://kevin-lee.github.io/sbt-github-pages)
