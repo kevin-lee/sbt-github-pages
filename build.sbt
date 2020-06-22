@@ -96,7 +96,6 @@ lazy val root = (project in file("."))
   , gitHubPagesOrgName := "Kevin-Lee"
   , gitHubPagesRepoName := "sbt-github-pages"
   , gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
-  , gitHubPagesAcceptedTextExtensions += ".js"
 
   , prepareDocusaurusBuild := Def.taskDyn {
       val algoliaConfigFileName = sys.env.getOrElse("ALGOLIA_CONFIG_FILENAME", "algolia.config.json")
