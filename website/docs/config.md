@@ -196,28 +196,28 @@ gitHubPagesIgnoreDotDirs := false
 
 
 ### Accepted Text Extensions
-| Name                                | Value Type    | Default                                                                |
-| ----------------------------------- | ------------- | ---------------------------------------------------------------------- |
-| `gitHubPagesAcceptedTextExtensions` | `Set[String]` | `Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")` |
+| Name                                | Value Type    | Default                                              |
+| ----------------------------------- | ------------- | ---------------------------------------------------- |
+| `gitHubPagesAcceptedTextExtensions` | `Set[String]` | `Set(".md", ".css", ".html", ".xml", ".js", ".txt")` |
 
 Accepted text files to create `UTF-8` encoded `String` based blob. 
 If the file's extension is not one of these, `Base64` encoded blob is created.
 
 Default:
 ```scala
-Set(".md", ".css", ".html", ".properties", ".txt", ".scala", ".sbt")
+Set(".md", ".css", ".html", ".xml", ".js", ".txt")
 ```
 
 e.g.) You add more or remove some.
 ```scala
 gitHubPagesAcceptedTextExtensions :=
-  Set(".json", ".js", ".css", ".html", ".md", ".txt")
+  Set(".json", ".js", ".css", ".html")
 ```
 
 ### Accepted Text MaxLength
-| Name                                | Value Type | Default |
-| ----------------------------------- | ---------- | ------- |
-| `gitHubPagesAcceptedTextMaxLength`  | `Int`      | `4048`  |
+| Name                                | Value Type | Default  |
+| ----------------------------------- | ---------- | -------- |
+| `gitHubPagesAcceptedTextMaxLength`  | `Int`      | `10240`  |
 
 The max length of the bytes (`Array[Byte]`) of the file to commit. 
 If the file byte size is greater than this, `Base64` encoded blob is created.

@@ -6,4 +6,4 @@ addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.8")
 
 addSbtPlugin("io.kevinlee" % "sbt-devoops" % "1.0.3")
 
-addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.1.0")
+addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.1.1")
