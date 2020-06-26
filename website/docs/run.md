@@ -27,7 +27,7 @@ $ cd YOUR_PROJECT
 $ git checkout --orphan gh-pages
 
 # Make sure you're in the project directory.
-$ rm -Rf .
+$ git rm -rf .
 
 $ git commit --allow-empty -m "Add gh-pages branch"
 
