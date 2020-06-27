@@ -43,7 +43,8 @@ jobs:
 
       - name: Build website using Docusaurus
         run: |
-          cd website
-          pwd
-          npm install
-          npm run build
+          sbt clean \
+            docusaurGenerateAlgoliaConfigFile \
+            docusaurInstall \
+            docusaurCleanBuild \
+            docusaurBuild
