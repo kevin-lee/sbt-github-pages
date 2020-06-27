@@ -88,7 +88,7 @@ Root ─┬─ dirA
 ```
 
 ```scala
-gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website/build"
+gitHubPagesSiteDir := (ThisBuild / baseDirectory).value / "website" / "build"
 ```
 
 ## More Settings

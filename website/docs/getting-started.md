@@ -18,6 +18,28 @@ In the `project/plugins.sbt`, add the following line,
 addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.1.1")
 ```
 
+In your `build.sbt`,
+```scala
+lazy val root = (project in file("."))
+  .enablePlugins(GitHubPagesPlugin)
+  .settings(
+    name := "YOUR_PROJECT",
+    gitHubPagesOrgName := "USERNAME_OR_ORG",
+    gitHubPagesRepoName := "YOUR_PROJECT",
+    gitHubPagesSiteDir := baseDirectory.value / "path/to/github-pages-root"
+  )
+```
+
+To publish `gh-pages`, run the following task in sbt console
+```sbtshell
+sbt:test-project> publishToGitHubPages 
+```
+or in bash or zsh
+```bash
+sbt publishToGitHubPages 
+```
+
+
 ## Why sbt-github-pages?
 
 So why `sbt-github-pages`? There's already the sbt plugin called [`sbt-ghpages`](https://github.com/sbt/sbt-ghpages) which does the same thing.
