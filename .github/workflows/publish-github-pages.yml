@@ -41,23 +41,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: prepare Docusaurus build
+      - name: Build and publish website using Docusaurus
         env:
           ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
           ALGOLIA_INDEX_NAME: ${{ secrets.ALGOLIA_INDEX_NAME }}
-        run: |
-          sbt clean prepareDocusaurusBuild
-
-      - name: Build and publish website using Docusaurus
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd website
-          echo "> Install packages"
-          npm install
-          echo "> Build the website using Docusaurus"
-          rm -Rf build
-          npm run build
-          cd ..
-          echo "> Publish to GitHub Pages"
-          sbt publishToGitHubPages
+          sbt clean \
+            docusaurGenerateAlgoliaConfigFile \
+            docusaurInstall \
+            docusaurCleanBuild \
+            docusaurBuild \
+            publishToGitHubPages
