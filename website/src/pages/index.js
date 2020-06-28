@@ -12,7 +12,7 @@ const features = [
     imageUrl: 'img/undraw_docusaurus_mountain.svg',
     description: (
       <>
-        sbt-github-pages was designed to publish GitHub Pages with minimum effort.
+        sbt-github-pages was designed to publish GitHub Pages with minimal effort.
       </>
     ),
   },

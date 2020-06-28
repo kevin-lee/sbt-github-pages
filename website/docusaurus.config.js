@@ -9,7 +9,7 @@ const isSearchable = !isEmptyObject(algoliaConfig)
 
 const websiteConfig = {
   title: 'sbt-github-pages',
-  tagline: 'Publish GitHub Pages with minimum effort',
+  tagline: 'Publish GitHub Pages with minimal effort',
   url: 'https://kevin-lee.github.io',
   baseUrl: '/sbt-github-pages/',
   favicon: 'img/favicon.png',
