@@ -32,6 +32,11 @@ const websiteConfig = {
           label: 'Docs',
           position: 'right',
         },
+        {
+          label: 'GitHub',
+          href: 'https://github.com/Kevin-Lee/sbt-github-pages',
+          position: 'right',
+        },
       ],
     },
     footer: {
