@@ -34,7 +34,7 @@ This key must be set by the user of this plugin.
 
 | Name                 | Value Type | Default    |
 | -------------------- | ---------- | ---------- |
-| `gitHubPagesOrgName` | `Boolean`  |            |
+| `gitHubPagesOrgName` | `String`   |            |
 
 The GitHub organization name (or username) (i.e.`OrgName` from `https://github.com/OrgName/RepoName`)
 
@@ -52,7 +52,7 @@ This key must be set by the user of this plugin.
 
 | Name                  | Value Type | Default    |
 | --------------------- | ---------- | ---------- |
-| `gitHubPagesRepoName` | `Boolean`  |            |
+| `gitHubPagesRepoName` | `String`  |            |
 
 The GitHub project repository name (i.e. `RepoName` from `https://github.com/OrgName/RepoName`)
 
