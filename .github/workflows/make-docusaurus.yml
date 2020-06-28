@@ -10,28 +10,36 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        scala:
+          - { version: "2.12.11", binary-version: "2.12", java-version: "11" }
+
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.scala.java-version }}
       - uses: actions/setup-node@v1
         with:
-          node-version: '14.2.0'
+          node-version: '14.4.0'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Cache Coursier
         uses: actions/cache@v1
         with:
           path: ~/.cache/coursier
-          key: ${{ runner.os }}-coursier-scala-2_13-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
+          key: ${{ runner.os }}-coursier-scala-${{ matrix.scala.binary-version }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
           restore-keys: |
-            ${{ runner.os }}-coursier-scala-2_13-
+            ${{ runner.os }}-coursier-scala-${{ matrix.scala.binary-version }}-
 
       - name: Cache Ivy
         uses: actions/cache@v1
         with:
           path: ~/.ivy2/cache
-          key: ${{ runner.os }}-ivy-scala-2_13-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
+          key: ${{ runner.os }}-ivy-scala-${{ matrix.scala.binary-version }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
           restore-keys: |
-            ${{ runner.os }}-ivy-scala-2_13-
+            ${{ runner.os }}-ivy-scala-${{ matrix.scala.binary-version }}-
 
       - name: Cache npm
         uses: actions/cache@v1
@@ -41,7 +49,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Build website using Docusaurus
+      - name: Build website
         run: |
           sbt clean \
             docusaurGenerateAlgoliaConfigFile \
