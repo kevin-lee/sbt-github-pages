@@ -222,7 +222,7 @@ gitHubPagesAcceptedTextExtensions :=
 The max length of the bytes (`Array[Byte]`) of the file to commit. 
 If the file byte size is greater than this, `Base64` encoded blob is created.
 
-e.g.) You can make it bigger.
+e.g.) You can make it smaller.
 ```scala
 gitHubPagesAcceptedTextMaxLength := 6144
 ```
