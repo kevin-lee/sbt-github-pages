@@ -56,8 +56,8 @@ function Home() {
   const {siteConfig = {}} = context;
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`${siteConfig.title}, Publish GitHub Pages with minimal effort`}
+      description={`${siteConfig.title}, sbt plugin to publish GitHub Pages`}>
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
           <img src={`${useBaseUrl('img/')}/poster.png`} alt="Project Logo" />
