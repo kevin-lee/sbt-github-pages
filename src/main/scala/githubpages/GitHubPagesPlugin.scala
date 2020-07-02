@@ -47,7 +47,7 @@ object GitHubPagesPlugin extends AutoPlugin {
     dirFilter: File => Boolean,
     isText: Data.IsText,
     headers: Map[String, String]
-  ): F[Either[GitHubError, Ref]] =
+  ): F[Either[GitHubError, Option[Ref]]] =
     EitherT(
       FileF.getAllDirsRecursively(
         siteDir.siteDir,
@@ -62,7 +62,7 @@ object GitHubPagesPlugin extends AutoPlugin {
         eitherTOfPure(
           GitHubError.messageOnly(
             s"No files to commit in the dir at ${siteDir.siteDir.getCanonicalPath}"
-          ).asLeft[Ref]
+          ).asLeft[Option[Ref]]
         )
 
       case x +: xs =>
@@ -165,8 +165,12 @@ object GitHubPagesPlugin extends AutoPlugin {
                 } yield result
               }
           } yield result).unsafeRunSync() match {
-            case Right(r) =>
-              log.info(s"Successfully pushed to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}")
+            case Right(Some(ref)) =>
+              log.info(s"Successfully pushed to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo} - Ref.Sha: ${ref.`object`.sha}")
+
+            case Right(None) =>
+              log.info(s"There was nothing to push to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}")
+
             case Left(error) =>
               throw new MessageOnlyException(GitHubError.render(error))
           }
