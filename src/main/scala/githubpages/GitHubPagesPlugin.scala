@@ -135,7 +135,8 @@ object GitHubPagesPlugin extends AutoPlugin {
       implicit val log: loggerf.Logger = SbtLogger.sbtLogger(streams.value.log)
 
       if (gitHubToken.nonEmpty) {
-        Def.task {
+        @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+        val publishToGitHubPagesTask = Def.task {
           (for {
             commitMessage <- IO.pure(commitMessage)
             _ <- IO(
@@ -147,11 +148,11 @@ object GitHubPagesPlugin extends AutoPlugin {
                      |""".stripMargin
                 )
               )
-            _ <- BlazeClientBuilder[IO](ec).resource.use { client =>
+            result <- BlazeClientBuilder[IO](ec).resource.use { client =>
                 for {
                   gitHubRepo <- IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken))
                   _ <- if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit
-                  _ <- pushToGhPages[IO](
+                  result <- pushToGhPages[IO](
                       client,
                       gitHubRepo,
                       gitHubPagesPublishBranch,
@@ -161,10 +162,16 @@ object GitHubPagesPlugin extends AutoPlugin {
                       GitHubApi.buildIsText(blobConfig),
                       GitHubApi.essentialHeaders
                     )
-                } yield ()
+                } yield result
               }
-          } yield ()).unsafeRunSync()
+          } yield result).unsafeRunSync() match {
+            case Right(r) =>
+              log.info(s"Successfully pushed to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}")
+            case Left(error) =>
+              throw new MessageOnlyException(GitHubError.render(error))
+          }
         }
+        publishToGitHubPagesTask
       } else {
         Def.task(
           log.error(
