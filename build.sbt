@@ -32,7 +32,8 @@ val http4sDsl: ModuleID = "org.http4s" %% "http4s-dsl" % http4sVersion
 val http4sClient: ModuleID = "org.http4s" %% "http4s-blaze-client" % http4sVersion
 
 val effectie: ModuleID = "io.kevinlee" %% "effectie-cats-effect" % "1.0.0"
-val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "0.3.1"
+val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "0.4.0"
+val loggerFSbtLogging: ModuleID = "io.kevinlee" %% "logger-f-sbt-logging" % "0.4.0"
 
 lazy val prepareDocusaurusBuild: TaskKey[Unit] =
   taskKey[Unit]("Task to do some preparation for docusaurus build.")
@@ -73,7 +74,9 @@ lazy val root = (project in file("."))
   , resolvers += hedgehogRepo
   , addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
   , addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
-  , libraryDependencies ++= Seq(cats, catsEffect, github4s, http4sDsl, http4sClient, effectie, loggerFCatsEffect) ++ hedgehogLibs
+  , libraryDependencies ++= Seq(
+      cats, catsEffect, github4s, http4sDsl, http4sClient, effectie, loggerFCatsEffect, loggerFSbtLogging
+    ) ++ hedgehogLibs
   , testFrameworks ++= Seq(TestFramework("hedgehog.sbt.Framework"))
 
   /* GitHub Release { */
