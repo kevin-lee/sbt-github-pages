@@ -17,6 +17,8 @@ const websiteConfig = {
   projectName: 'sbt-github-pages', // Usually your repo name.
   themeConfig: {
     prism: {
+      theme: require('prism-react-renderer/themes/nightOwl'),
+      darkTheme: require('prism-react-renderer/themes/nightOwl'),
       additionalLanguages: ['scala'],
     },
     navbar: {
