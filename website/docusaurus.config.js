@@ -67,7 +67,7 @@ const websiteConfig = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} sbt-github-pages, Website Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} sbt-github-pages, Website Built with Docusaurus.<br /><div>Some icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> and <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>`,
     },
   },
   presets: [
