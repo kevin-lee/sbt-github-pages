@@ -9,7 +9,7 @@ import styles from './styles.module.css';
 const features = [
   {
     title: <>Easy to Setup</>,
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
+    imageUrl: 'img/web-page.svg',
     description: (
       <>
         sbt-github-pages was designed to publish GitHub Pages with minimal effort.
@@ -18,7 +18,7 @@ const features = [
   },
   {
     title: <>Works Well with GitHub Actions</>,
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
+    imageUrl: 'img/github.svg',
     description: (
       <>
         Easy to publish GitHub Pages through GitHub Actions.
@@ -27,7 +27,7 @@ const features = [
   },
   {
     title: <>Written in FP Scala</>,
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    imageUrl: 'img/lambda.svg',
     description: (
       <>
         Written in FP Scala yet you probably don't care. 🙂
