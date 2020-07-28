@@ -38,6 +38,10 @@ object GitHubPagesPlugin extends AutoPlugin {
   object autoImport extends GitHubPagesKeys
   import autoImport._
 
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+  private def failWithMessage(message: String): Unit =
+    throw new MessageOnlyException(message)
+
   private def pushToGhPages[F[_]: EffectConstructor: CanCatch: CatsSync: ConcurrentEffect: Timer: LogF](
     client: Client[F],
     gitHubRepo: Data.GitHubRepoWithAuth,
@@ -166,19 +170,24 @@ object GitHubPagesPlugin extends AutoPlugin {
               }
           } yield result).unsafeRunSync() match {
             case Right(Some(ref)) =>
-              log.info(s"Successfully pushed to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo} - Ref.Sha: ${ref.`object`.sha}")
+              log.info(
+                s"Successfully pushed to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo} " +
+                  s"- Ref.Sha: ${ref.`object`.sha}"
+              )
 
             case Right(None) =>
-              log.info(s"There was nothing to push to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}")
+              failWithMessage(
+                s"There was nothing to push to ${gitHubPagesPublishBranch.gitHubPagesBranch} at ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}"
+              )
 
             case Left(error) =>
-              throw new MessageOnlyException(GitHubError.render(error))
+              failWithMessage(GitHubError.render(error))
           }
         }
         publishToGitHubPagesTask
       } else {
         Def.task(
-          log.error(
+          failWithMessage(
             s"""
                |You must provide a GitHub token through
                |the environment variable named 'GITHUB_TOKEN' for pushing GitHub Pages.
