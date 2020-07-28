@@ -5,7 +5,7 @@ set -x
 if [ "$#" -ne 2 ]
   then
     echo "Scala version is missing. Please enter the Scala version."
-    echo "sbt-build-simple.sh 2.12.11 1.3.12"
+    echo "sbt-build-simple.sh 2.12.12 1.3.12"
     exit 1
 else
   SCALA_VERSION=$1
