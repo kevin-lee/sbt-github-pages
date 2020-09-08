@@ -2,6 +2,7 @@ package githubpages
 
 import java.io.File
 
+import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.GitHubApi
 import sbt._
 
@@ -12,6 +13,31 @@ import sbt._
 trait GitHubPagesKeys {
 
   val defaultDirNamesShouldBeIgnored: Set[String] = Set("target", "bin", "output")
+
+  lazy val gitHubPagesGitHubBaseUrl: SettingKey[String] =
+    settingKey[String](
+      "The GitHub base URL for GitHub Enterprise. No need to set if you're using github.com. " +
+        s"(default: ${GitHubApiConfig.default.baseUrl.baseUrl})"
+    )
+
+  lazy val gitHubPagesGitHubAuthorizeUrl: SettingKey[String] =
+    settingKey[String](
+      "The GitHub authorize URL for GitHub Enterprise. No need to set if you're using github.com. " +
+        s"(default: ${GitHubApiConfig.default.authorizeUrl.authorizeUrl})"
+    )
+
+  lazy val gitHubPagesGitHubAccessTokenUrl: SettingKey[String] =
+    settingKey[String](
+      "The GitHub access token URL for GitHub Enterprise. No need to set if you're using github.com. " +
+        s"(default: ${GitHubApiConfig.default.accessTokenUrl.accessTokenUrl})"
+    )
+
+  lazy val gitHubPagesGitHubHeaders: SettingKey[Map[String, String]] =
+    settingKey[Map[String, String]](
+      "The headers to add when sending a request to GitHub Enterprise API. No need to set if you're using github.com. " +
+        s"(default: ${GitHubApiConfig.default.headers.headers})"
+    )
+
 
   lazy val gitHubPagesBranch: SettingKey[String] =
     settingKey[String]("The GitHub Pages branch (default: gh-pages)")

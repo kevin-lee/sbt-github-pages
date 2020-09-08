@@ -10,6 +10,8 @@ import effectie.cats.{CanCatch, EffectConstructor}
 import filef.FileF
 
 import github4s.domain.Ref
+
+import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.{Data, GitHubApi, GitHubError}
 
 import loggerf.logger._
@@ -43,6 +45,7 @@ object GitHubPagesPlugin extends AutoPlugin {
 
   private def pushToGhPages[F[_]: EffectConstructor: CanCatch: CatsSync: ConcurrentEffect: Timer: LogF](
     client: Client[F],
+    gitHubApiConfig: GitHubApiConfig,
     gitHubRepo: Data.GitHubRepoWithAuth,
     gitHubPagesBranch: Data.GitHubPagesBranch,
     commitMessage: Data.CommitMessage,
@@ -96,7 +99,7 @@ object GitHubPagesPlugin extends AutoPlugin {
                   dirs,
                   isText,
                   headers
-                )
+                )(gitHubApiConfig)
               )
           } yield result
     }.value
@@ -109,6 +112,10 @@ object GitHubPagesPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
+    gitHubPagesGitHubBaseUrl := GitHubApiConfig.default.baseUrl.baseUrl,
+    gitHubPagesGitHubAuthorizeUrl := GitHubApiConfig.default.authorizeUrl.authorizeUrl,
+    gitHubPagesGitHubAccessTokenUrl := GitHubApiConfig.default.accessTokenUrl.accessTokenUrl,
+    gitHubPagesGitHubHeaders := GitHubApiConfig.default.headers.headers,
     gitHubPagesGitHubToken := sys.env.get("GITHUB_TOKEN"),
     gitHubPagesDirsToIgnore := defaultDirNamesShouldBeIgnored,
     gitHubPagesIgnoreDotDirs := true,
@@ -134,6 +141,12 @@ object GitHubPagesPlugin extends AutoPlugin {
       val textExtensions = gitHubPagesAcceptedTextExtensions.value
       val textMaxLength = gitHubPagesAcceptedTextMaxLength.value
       val blobConfig = Data.BlobConfig(textExtensions, textMaxLength)
+      val gitHubApiConfig: GitHubApiConfig = GitHubApiConfig(
+        baseUrl = GitHubApiConfig.BaseUrl(gitHubPagesGitHubBaseUrl.value),
+        authorizeUrl = GitHubApiConfig.AuthorizeUrl(gitHubPagesGitHubAuthorizeUrl.value),
+        accessTokenUrl = GitHubApiConfig.AccessTokenUrl(gitHubPagesGitHubAccessTokenUrl.value),
+        headers = GitHubApiConfig.Headers(gitHubPagesGitHubHeaders.value)
+      )
 
       implicit val ec: ExecutionContext = ExecutionContext.global
       implicit val cs: ContextShift[IO] = IO.contextShift(ec)
@@ -161,6 +174,7 @@ object GitHubPagesPlugin extends AutoPlugin {
                   _ <- if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit
                   result <- pushToGhPages[IO](
                       client,
+                      gitHubApiConfig,
                       gitHubRepo,
                       gitHubPagesPublishBranch,
                       commitMessage,
