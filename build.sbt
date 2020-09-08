@@ -23,8 +23,8 @@ val hedgehogLibs: Seq[ModuleID] = Seq(
   , "qa.hedgehog" %% "hedgehog-sbt" % hedgehogVersion % Test
   )
 
-val cats: ModuleID = "org.typelevel" %% "cats-core" % "2.1.1"
-val catsEffect: ModuleID = "org.typelevel" %% "cats-effect" % "2.1.3"
+val cats: ModuleID = "org.typelevel" %% "cats-core" % "2.2.0"
+val catsEffect: ModuleID = "org.typelevel" %% "cats-effect" % "2.2.0"
 val github4s: ModuleID = "com.47deg" %% "github4s" % "0.24.0"
 
 val http4sVersion: String = "0.21.3"

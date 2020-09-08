@@ -2,7 +2,7 @@ package githubpages
 
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{ConcurrentEffect, ContextShift, IO, Timer, Sync => CatsSync}
-import cats.implicits._
+import cats.syntax.all._
 
 import effectie.cats.EitherTSupport._
 import effectie.cats.{CanCatch, EffectConstructor}
