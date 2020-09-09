@@ -6,7 +6,7 @@ import java.util.Base64
 import cats._
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{ConcurrentEffect, Timer}
-import cats.implicits._
+import cats.syntax.all._
 import effectie.cats.EitherTSupport._
 import effectie.cats.{CanCatch, EffectConstructor}
 import filef.FileF

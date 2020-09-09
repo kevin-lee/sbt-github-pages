@@ -7,7 +7,7 @@ import java.nio.channels.FileChannel
 import cats._
 import cats.data.EitherT
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import effectie.Effectful._
 import effectie.cats.Catching._
 import effectie.cats.{CanCatch, EffectConstructor}
