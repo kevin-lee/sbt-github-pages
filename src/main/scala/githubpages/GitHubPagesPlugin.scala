@@ -12,10 +12,9 @@ import filef.FileF
 import github4s.domain.Ref
 import githubpages.github.{Data, GitHubApi, GitHubError}
 
-import loggerf.cats.Log.LeveledMessage._
-import loggerf.cats.Logful._
-import loggerf.cats.{Log => LogF}
-import loggerf.sbt.SbtLogger
+import loggerf.logger._
+import loggerf.cats.{Log => LogF, _}
+import loggerf.syntax._
 
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -74,7 +73,11 @@ object GitHubPagesPlugin extends AutoPlugin {
             dirs <- eitherTRightPure(NonEmptyVector(x, xs))
             _ <- log(
                 EitherT(FileF.getAllFiles[F](dirs.toVector))
-                  .leftMap(GitHubError.fileHandling(s"getting all files in ${dirs.toVector.mkString("[", ",", "]")} to push to GitHub Pages"))
+                  .leftMap(
+                    GitHubError.fileHandling(
+                      s"getting all files in ${dirs.toVector.mkString("[", ",", "]")} to push to GitHub Pages"
+                    )
+                  )
               )(
                 err => error(GitHubError.render(err)),
                 files => info(
@@ -136,7 +139,7 @@ object GitHubPagesPlugin extends AutoPlugin {
       implicit val cs: ContextShift[IO] = IO.contextShift(ec)
       implicit val timer: Timer[IO] = IO.timer(ec)
 
-      implicit val log: loggerf.Logger = SbtLogger.sbtLogger(streams.value.log)
+      implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 
       if (gitHubToken.nonEmpty) {
         @SuppressWarnings(Array("org.wartremover.warts.Throw"))
