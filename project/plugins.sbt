@@ -6,4 +6,4 @@ addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.10")
 
 addSbtPlugin("io.kevinlee" % "sbt-devoops" % "1.0.3")
 
-addSbtPlugin("io.kevinlee" % "sbt-docusaur" % "0.1.4")
+addSbtPlugin("io.kevinlee" % "sbt-docusaur" % "0.2.0")
