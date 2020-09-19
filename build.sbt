@@ -26,6 +26,7 @@ val hedgehogLibs: Seq[ModuleID] = Seq(
 val cats: ModuleID = "org.typelevel" %% "cats-core" % "2.2.0"
 val catsEffect: ModuleID = "org.typelevel" %% "cats-effect" % "2.2.0"
 val github4s: ModuleID = "com.47deg" %% "github4s" % "0.25.0"
+val circeParser: ModuleID = "io.circe" %% "circe-parser" % "0.13.0"
 
 val http4sVersion: String = "0.21.6"
 val http4sDsl: ModuleID = "org.http4s" %% "http4s-dsl" % http4sVersion
@@ -75,7 +76,7 @@ lazy val root = (project in file("."))
   , addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
   , addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   , libraryDependencies ++= Seq(
-      cats, catsEffect, github4s, http4sDsl, http4sClient, effectie, loggerFCatsEffect, loggerFSbtLogging
+      cats, catsEffect, github4s, circeParser, http4sDsl, http4sClient, effectie, loggerFCatsEffect, loggerFSbtLogging
     ) ++ hedgehogLibs
   , testFrameworks ++= Seq(TestFramework("hedgehog.sbt.Framework"))
 

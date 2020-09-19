@@ -43,6 +43,15 @@ object GitHubPagesPlugin extends AutoPlugin {
   private def failWithMessage(message: String): Unit =
     throw new MessageOnlyException(message)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+  def returnOrThrowMessageOnlyException[A, B](
+    aOrB: Either[A, B]
+  )(
+    aToString: A => String
+  ): B =
+    aOrB.fold(a => throw new MessageOnlyException(aToString(a)), identity)
+
+
   private def pushToGhPages[F[_]: EffectConstructor: CanCatch: CatsSync: ConcurrentEffect: Timer: LogF](
     client: Client[F],
     gitHubApiConfig: GitHubApiConfig,
@@ -104,6 +113,19 @@ object GitHubPagesPlugin extends AutoPlugin {
           } yield result
     }.value
 
+  private def decodeJsonToMapOfStringToString(message: String)(jsonString: String): Map[String, String] = {
+    import _root_.io.circe.parser._
+
+    def errorMessage[A](err: A) =
+      s"""Invalid JSON $message
+         | - ERROR: $err
+         | - Input: $jsonString
+         """.stripMargin
+
+    val headers = returnOrThrowMessageOnlyException(parse(jsonString))(errorMessage).as[Map[String, String]]
+    returnOrThrowMessageOnlyException(headers)(errorMessage)
+  }
+
   override lazy val globalSettings: Seq[Def.Setting[_]] = Seq(
     gitHubPagesBranch := "gh-pages",
     gitHubPagesNoJekyll := true,
@@ -112,10 +134,12 @@ object GitHubPagesPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
-    gitHubPagesGitHubBaseUrl := GitHubApiConfig.default.baseUrl.baseUrl,
-    gitHubPagesGitHubAuthorizeUrl := GitHubApiConfig.default.authorizeUrl.authorizeUrl,
-    gitHubPagesGitHubAccessTokenUrl := GitHubApiConfig.default.accessTokenUrl.accessTokenUrl,
-    gitHubPagesGitHubHeaders := GitHubApiConfig.default.headers.headers,
+    gitHubPagesGitHubBaseUrl := sys.env.getOrElse("GITHUB_ENT_BASE_URL", GitHubApiConfig.default.baseUrl.baseUrl),
+    gitHubPagesGitHubAuthorizeUrl := sys.env.getOrElse("GITHUB_ENT_AUTHORIZE_URL", GitHubApiConfig.default.authorizeUrl.authorizeUrl),
+    gitHubPagesGitHubAccessTokenUrl := sys.env.getOrElse("GITHUB_ENT_ACCESS_TOKEN_URL", GitHubApiConfig.default.accessTokenUrl.accessTokenUrl),
+    gitHubPagesGitHubHeaders :=
+      sys.env.get("GITHUB_ENT_HEADERS")
+        .fold(GitHubApiConfig.default.headers.headers)(decodeJsonToMapOfStringToString("for the environment variable 'GITHUB_ENT_HEADERS'")),
     gitHubPagesGitHubToken := sys.env.get("GITHUB_TOKEN"),
     gitHubPagesDirsToIgnore := defaultDirNamesShouldBeIgnored,
     gitHubPagesIgnoreDotDirs := true,
