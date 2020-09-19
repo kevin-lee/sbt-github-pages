@@ -2,6 +2,10 @@ package githubpages.github
 
 import java.io.File
 
+import cats._
+import cats.syntax.all._
+
+import github4s.GithubConfig
 import github4s.domain.TreeResult
 
 /**
@@ -9,6 +13,43 @@ import github4s.domain.TreeResult
  * @since 2020-05-27
  */
 object Data {
+
+  final case class GitHubApiConfig(
+    baseUrl: GitHubApiConfig.BaseUrl,
+    authorizeUrl: GitHubApiConfig.AuthorizeUrl,
+    accessTokenUrl: GitHubApiConfig.AccessTokenUrl,
+    headers: GitHubApiConfig.Headers
+  )
+  object GitHubApiConfig {
+
+    final case class BaseUrl(baseUrl: String) extends AnyVal
+    final case class AuthorizeUrl(authorizeUrl: String) extends AnyVal
+    final case class AccessTokenUrl(accessTokenUrl: String) extends AnyVal
+    final case class Headers(headers: Map[String, String]) extends AnyVal
+
+    implicit val equal: Eq[GitHubApiConfig] = Eq.fromUniversalEquals[GitHubApiConfig]
+
+    def default: GitHubApiConfig =
+      GitHubApiConfig(
+        baseUrl = GitHubApiConfig.BaseUrl(GithubConfig.default.baseUrl),
+        authorizeUrl = GitHubApiConfig.AuthorizeUrl(GithubConfig.default.authorizeUrl),
+        accessTokenUrl = GitHubApiConfig.AccessTokenUrl(GithubConfig.default.accessTokenUrl),
+        headers = GitHubApiConfig.Headers(GithubConfig.default.headers)
+      )
+
+    def toGithubConfig(gitHubApiConfig: GitHubApiConfig): GithubConfig = {
+      if (gitHubApiConfig === default)
+        GithubConfig.default
+      else
+        GithubConfig(
+          baseUrl = gitHubApiConfig.baseUrl.baseUrl,
+          authorizeUrl = gitHubApiConfig.authorizeUrl.authorizeUrl,
+          accessTokenUrl = gitHubApiConfig.accessTokenUrl.accessTokenUrl,
+          headers = gitHubApiConfig.headers.headers
+        )
+    }
+
+  }
 
   final case class GitHubRepo(
     org: GitHubRepo.Org,

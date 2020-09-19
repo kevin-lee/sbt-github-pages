@@ -11,8 +11,8 @@ import effectie.cats.EitherTSupport._
 import effectie.cats.{CanCatch, EffectConstructor}
 import filef.FileF
 import github4s.domain._
-import github4s.{GHResponse, Github}
-import githubpages.github.Data.CommitInfo
+import github4s.{GHResponse, Github, GithubConfig}
+import githubpages.github.Data.{CommitInfo, GitHubApiConfig}
 import loggerf.cats._
 import loggerf.syntax._
 import org.http4s.client.Client
@@ -281,7 +281,8 @@ object GitHubApi {
     } yield refCommit
 
 
-  def commitAndPush[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
+  private[github] def commitAndPush0[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
     client: Client[F],
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
     branch: Data.Branch,
@@ -290,7 +291,7 @@ object GitHubApi {
     allDirs: NonEmptyVector[File],
     isText: Data.IsText,
     headers: Map[String, String]
-  ): F[Either[GitHubError, Option[Ref]]] = (for {
+  )(implicit githubConfig: GithubConfig): F[Either[GitHubError, Option[Ref]]] = (for {
     github <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     commitInfo = Data.CommitInfo(gitHubRepoWithAuth.gitHubRepo, branch, commitMessage)
     refCommit <-
@@ -303,5 +304,20 @@ object GitHubApi {
         updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers)
       )
   } yield headRef).value
+
+  @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
+  def commitAndPush[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
+    client: Client[F],
+    gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
+    branch: Data.Branch,
+    baseDir: Data.BaseDir,
+    commitMessage: Data.CommitMessage,
+    allDirs: NonEmptyVector[File],
+    isText: Data.IsText,
+    headers: Map[String, String]
+  )(gitHubApiConfig: GitHubApiConfig): F[Either[GitHubError, Option[Ref]]] = {
+    implicit val githubConfig = GitHubApiConfig.toGithubConfig(gitHubApiConfig)
+    commitAndPush0(client, gitHubRepoWithAuth, branch, baseDir, commitMessage, allDirs, isText, headers)
+  }
 
 }
