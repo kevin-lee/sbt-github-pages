@@ -23,7 +23,7 @@ Root ─┬─ project
 In the `project/plugins.sbt`
 
 ```sbt
-addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.1.3")
+addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.2.0")
 ```
 
 
