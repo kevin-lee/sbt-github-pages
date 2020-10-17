@@ -228,57 +228,39 @@ object GitHubApi {
         )
     } yield response
 
-  private def updateCommitDir[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
+  private def updateCommitFiles[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
     github: Github[F],
     commitInfo: CommitInfo,
     baseDir: Data.BaseDir,
-    dirToCommit: File,
+    allFiles: Vector[File],
     isText: Data.IsText,
     commitSha: Option[Data.CommitSha],
     headers: Map[String, String]
   ): EitherT[F, GitHubError, Option[Data.CommitSha]] =
-    for {
-      allFiles <- log(
-          EitherT(FileF.getAllFiles(Vector(dirToCommit)))
-            .leftMap(GitHubError.fileHandling("getting all files to update commit dir"))
-        )(
-          err => error(GitHubError.render(err)),
-          files => {
-            val message =
-              if (files.isEmpty)
-                s"No files in ${dirToCommit.getCanonicalPath} so skip committing"
-              else
-                files.mkString("[\n  ", "\n  ", "\n]")
-            debug(s"Files to commit: $message")
-          }
-        )
-
-      refCommit <- if (allFiles.isEmpty) {
-          eitherTRight[GitHubError](commitSha)
-        } else {
-          for {
-            parentCommitSha <- commitSha.fold(
-                fetchHeadCommit(github, commitInfo.gitHubRepo, commitInfo.branch, headers)
-                  .map (ref => Data.CommitSha (ref.`object`.sha))
-              )(
-                sha => eitherTRightPure[GitHubError](sha)
-              )
-            maybeBaseTreeCommit <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
-            maybeBaseTreeCommitSha = maybeBaseTreeCommit.map(_.tree.sha)
-            treeDataList <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isText, headers)
-            treeResult <- createTree(github, commitInfo.gitHubRepo, maybeBaseTreeCommitSha, treeDataList, headers)
-            refCommit <- createCommit(
-                github,
-                commitInfo.gitHubRepo,
-                commitInfo.commitMessage,
-                Data.TreeResultSha.fromTreeResult(treeResult),
-                parentCommitSha,
-                headers
-              )
-          } yield Data.CommitSha(refCommit.sha).some
-
-        }
-    } yield refCommit
+    if (allFiles.isEmpty) {
+      eitherTRight[GitHubError](commitSha)
+    } else {
+      for {
+        parentCommitSha <- commitSha.fold(
+            fetchHeadCommit(github, commitInfo.gitHubRepo, commitInfo.branch, headers)
+              .map (ref => Data.CommitSha (ref.`object`.sha))
+          )(
+            sha => eitherTRightPure[GitHubError](sha)
+          )
+        maybeBaseTreeCommit <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
+        maybeBaseTreeCommitSha = maybeBaseTreeCommit.map(_.tree.sha)
+        treeDataList <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isText, headers)
+        treeResult <- createTree(github, commitInfo.gitHubRepo, maybeBaseTreeCommitSha, treeDataList, headers)
+        refCommit <- createCommit(
+            github,
+            commitInfo.gitHubRepo,
+            commitInfo.commitMessage,
+            Data.TreeResultSha.fromTreeResult(treeResult),
+            parentCommitSha,
+            headers
+          )
+      } yield Data.CommitSha(refCommit.sha).some
+    }
 
 
   @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
@@ -294,12 +276,22 @@ object GitHubApi {
   )(implicit githubConfig: GithubConfig): F[Either[GitHubError, Option[Ref]]] = (for {
     github <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     commitInfo = Data.CommitInfo(gitHubRepoWithAuth.gitHubRepo, branch, commitMessage)
-    refCommit <-
-      allDirs.reduceLeftM(firstDir =>
-          updateCommitDir(github, commitInfo, baseDir, firstDir, isText, none[Data.CommitSha], headers)
-        ) { (maybeCommitSha, dir) =>
-          updateCommitDir(github, commitInfo, baseDir, dir, isText, maybeCommitSha, headers)
+    allFiles <- log(
+        EitherT(FileF.getAllFiles(allDirs.toVector))
+          .leftMap(GitHubError.fileHandling("getting all files to update commit dir"))
+      )(
+        err => error(GitHubError.render(err)),
+        files => {
+          val message =
+            if (files.isEmpty)
+              s"No files in ${baseDir.baseDir.getCanonicalPath} so skip committing"
+            else
+              files.mkString("[\n  ", "\n  ", "\n]")
+          debug(s"Files to commit: $message")
         }
+      )
+    refCommit <-
+      updateCommitFiles(github, commitInfo, baseDir, allFiles, isText, none[Data.CommitSha], headers)
     headRef <- refCommit.traverse(commitSha =>
         updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers)
       )
