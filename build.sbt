@@ -8,7 +8,7 @@ import sbt.ScmInfo
 val ProjectScalaVersion: String = "2.12.12"
 val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
-val GlobalSbtVersion: String = "1.3.13"
+val GlobalSbtVersion: String = "1.2.8"
 
 val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
@@ -61,6 +61,7 @@ lazy val root = (project in file("."))
   , sbtPlugin := true
   , sbtVersion in Global := GlobalSbtVersion
   , crossSbtVersions := CrossSbtVersions
+  , pluginCrossBuild / sbtVersion := "1.2.8"
   , scalacOptions ++= crossVersionProps(commonScalacOptions, SemVer.parseUnsafe(scalaVersion.value)) {
         case (SemVer.Major(2), SemVer.Minor(12)) =>
           Seq("-Ywarn-unused-import", "-Ywarn-numeric-widen")
