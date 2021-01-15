@@ -12,7 +12,7 @@ val GlobalSbtVersion: String = "1.2.8"
 
 val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-val hedgehogVersion: String = "0.5.1"
+val hedgehogVersion: String = "0.6.1"
 
 val hedgehogRepo: Resolver =
   "bintray-scala-hedgehog" at "https://dl.bintray.com/hedgehogqa/scala-hedgehog"
