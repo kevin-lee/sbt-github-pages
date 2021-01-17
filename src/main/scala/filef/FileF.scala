@@ -8,7 +8,7 @@ import cats._
 import cats.data.EitherT
 import cats.effect._
 import cats.syntax.all._
-import effectie.Effectful._
+import effectie.cats.Effectful._
 import effectie.cats.Catching._
 import effectie.cats.{CanCatch, EffectConstructor}
 
@@ -27,10 +27,10 @@ object FileF {
     file: File
   ): F[Either[FileError, String]] =
     (for {
-      base <- EitherT.liftF(effectOfPure(baseDir))
+      base <- EitherT.liftF(pureOf(baseDir))
       basePath <- if (base.isDirectory) EitherT {
             val basePath = base.getCanonicalPath
-            effectOfPure(
+            pureOf(
               if (basePath.endsWith(File.separator))
                 basePath.asRight[FileError]
               else
@@ -45,7 +45,7 @@ object FileF {
             if (filePath.startsWith(basePath))
               effectOf(filePath.substring(basePath.length).asRight[FileError])
             else
-              effectOfPure(FileError.notInBaseDir(baseDir, file).asLeft[String])
+              pureOf(FileError.notInBaseDir(baseDir, file).asLeft[String])
           )
     } yield relativePath).value
 
@@ -58,7 +58,7 @@ object FileF {
     dirs: Vector[File],
     fileFilter: File => Boolean
   ): F[Either[FileError, Vector[File]]] =
-    effectOfPure(dirs)
+    pureOf(dirs)
       .map(dirs =>
         (for {
           dir <- dirs
@@ -116,7 +116,7 @@ object FileF {
         effectOf(fileChannel.close()) *> effectOf(fileInputStream.close())
       }.use { case (_, fileChannel) =>
         for {
-          bytes <- effectOfPure(new ByteArrayOutputStream(bufferSize.bufferSize))
+          bytes <- pureOf(new ByteArrayOutputStream(bufferSize.bufferSize))
           _ <- effectOf(readFile0(fileChannel, bufferSize.bufferSize, bytes))
         } yield bytes.toByteArray
       }.attempt

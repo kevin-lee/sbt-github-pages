@@ -23,18 +23,18 @@ val hedgehogLibs: Seq[ModuleID] = Seq(
   , "qa.hedgehog" %% "hedgehog-sbt" % hedgehogVersion % Test
   )
 
-val cats: ModuleID = "org.typelevel" %% "cats-core" % "2.2.0"
-val catsEffect: ModuleID = "org.typelevel" %% "cats-effect" % "2.2.0"
-val github4s: ModuleID = "com.47deg" %% "github4s" % "0.25.0"
+val cats: ModuleID = "org.typelevel" %% "cats-core" % "2.3.1"
+val catsEffect: ModuleID = "org.typelevel" %% "cats-effect" % "2.3.1"
+val github4s: ModuleID = "com.47deg" %% "github4s" % "0.27.1"
 val circeParser: ModuleID = "io.circe" %% "circe-parser" % "0.13.0"
 
-val http4sVersion: String = "0.21.6"
+val http4sVersion: String = "0.21.15"
 val http4sDsl: ModuleID = "org.http4s" %% "http4s-dsl" % http4sVersion
 val http4sClient: ModuleID = "org.http4s" %% "http4s-blaze-client" % http4sVersion
 
-val effectie: ModuleID = "io.kevinlee" %% "effectie-cats-effect" % "1.3.0"
-val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "1.3.1"
-val loggerFSbtLogging: ModuleID = "io.kevinlee" %% "logger-f-sbt-logging" % "1.3.1"
+val effectie: ModuleID = "io.kevinlee" %% "effectie-cats-effect" % "1.8.0"
+val loggerFCatsEffect: ModuleID = "io.kevinlee" %% "logger-f-cats-effect" % "1.7.0"
+val loggerFSbtLogging: ModuleID = "io.kevinlee" %% "logger-f-sbt-logging" % "1.7.0"
 
 lazy val prepareDocusaurusBuild: TaskKey[Unit] =
   taskKey[Unit]("Task to do some preparation for docusaurus build.")
@@ -74,7 +74,7 @@ lazy val root = (project in file("."))
   , wartremoverErrors in (Compile, compile) ++= commonWarts
   , wartremoverErrors in (Test, compile) ++= commonWarts
   , resolvers += hedgehogRepo
-  , addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+  , addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full)
   , addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   , libraryDependencies ++= Seq(
       cats, catsEffect, github4s, circeParser, http4sDsl, http4sClient, effectie, loggerFCatsEffect, loggerFSbtLogging
