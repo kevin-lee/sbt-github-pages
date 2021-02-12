@@ -41,7 +41,9 @@ object GitHubApi {
 
   def buildIsText(blobConfig: Data.BlobConfig): Data.IsText = Data.IsText(blobConfig)
 
-
+  /*
+   * https://docs.github.com/en/rest/overview/resources-in-the-rest-api#abuse-rate-limits
+   */
   private def githubWithAbuseRateLimit[F[_]: ConcurrentEffect: Timer](github: Github[F]): F[Github[F]] =
     Timer[F].sleep(1.second).as(github)
 
