@@ -1,12 +1,10 @@
 name: Publish GitHub Pages
 
 on:
-  push:
-    branches:
-      - publish-docs
+  workflow_dispatch:
 
 jobs:
-  build:
+  build_and_publish_doc_site:
 
     runs-on: ubuntu-latest
 
