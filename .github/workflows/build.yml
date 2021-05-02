@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         scala:
-          - { version: "2.12.12", binary-version: "2.12", java-version: "adopt@1.8", sbt-version: "1.4.9" }
+          - { binary-version: "2.12", java-version: "adopt@1.8" }
 
     steps:
     - uses: actions/checkout@v2.3.4
@@ -35,4 +35,4 @@ jobs:
     - name: Build for Scala ${{ matrix.scala.version }} and sbt ${{ matrix.scala.sbt-version }}
       run: |
         java -version
-        .github/workflows/sbt-build-simple.sh ${{ matrix.scala.version }} ${{ matrix.scala.sbt-version }}
+        .github/workflows/sbt-build-simple.sh
