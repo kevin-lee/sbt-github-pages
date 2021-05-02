@@ -8,7 +8,6 @@ lazy val root = (project in file("."))
     organization := "io.kevinlee",
     name := "sbt-github-pages",
     scalaVersion := props.ProjectScalaVersion,
-    version := ProjectVersion,
     description := "sbt plugin to publish GitHub Pages",
     developers := List(
       Developer("Kevin-Lee", "Kevin Lee", "kevin.code@kevinlee.io", url("https://github.com/Kevin-Lee"))
@@ -32,11 +31,8 @@ lazy val root = (project in file("."))
     devOopsPackagedArtifacts := List.empty[String],
     /* } GitHub Release */
     /* Publish { */
-    publishMavenStyle := false,
-    licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-    bintrayPackageLabels := Seq("sbt", "plugin"),
-    bintrayVcsUrl := """https://github.com/Kevin-Lee/sbt-github-pages""".some,
-    bintrayRepository := "sbt-plugins",
+    publishMavenStyle := true,
+    licenses := List("MIT" -> url("http://opensource.org/licenses/MIT")),
     /* } Publish */
 
     /* Docs { */
