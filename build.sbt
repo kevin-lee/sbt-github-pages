@@ -23,7 +23,6 @@ lazy val root = (project in file("."))
     Global / sbtVersion := props.GlobalSbtVersion,
     crossSbtVersions := props.CrossSbtVersions,
     pluginCrossBuild / sbtVersion := "1.2.8",
-    scalacOptions ++= commonScalacOptions,
     Compile / console / scalacOptions := scalacOptions.value diff List("-Ywarn-unused-import", "-Xfatal-warnings"),
     Compile / compile / wartremoverErrors ++= commonWarts,
     Test / compile / wartremoverErrors ++= commonWarts,
