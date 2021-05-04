@@ -10,13 +10,15 @@ sbt plugin to publish GitHub Pages with minimal effort.
 
 [![Build Status](https://github.com/Kevin-Lee/sbt-github-pages/workflows/Build%20All/badge.svg)](https://github.com/Kevin-Lee/sbt-github-pages/actions?workflow=Build+All)
 [![Release Status](https://github.com/Kevin-Lee/sbt-github-pages/workflows/Release/badge.svg)](https://github.com/Kevin-Lee/sbt-github-pages/actions?workflow=Release)
-[ ![Download](https://api.bintray.com/packages/kevinlee/sbt-plugins/sbt-github-pages/images/download.svg) ](https://bintray.com/kevinlee/sbt-plugins/sbt-github-pages/_latestVersion)
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.kevinlee/sbt-github-pages/badge.svg)](https://search.maven.org/artifact/io.kevinlee/sbt-github-pages)
+[![Latest version](https://index.scala-lang.org/kevin-lee/sbt-github-pages/sbt-github-pages/latest.svg)](https://index.scala-lang.org/kevin-lee/sbt-github-pages/sbt-github-pages)
 
 ## Get sbt-github-pages
 
 In the `project/plugins.sbt`, add the following line,
 ```sbt
-addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.4.0")
+addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.5.0")
 ```
 
 In your `build.sbt`,
