@@ -1,11 +1,12 @@
-name: Publish GitHub Pages
+name: "[Doc][A] Build Only"
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - "**"
 
 jobs:
-  build_and_publish_doc_site:
-    if: github.ref != 'refs/heads/gh-pages' && github.ref != 'gh-pages'
+  build:
 
     runs-on: ubuntu-latest
 
@@ -43,18 +44,16 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - name: Build and publish website
+    - name: Build website
       env:
         ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
         ALGOLIA_INDEX_NAME: ${{ secrets.ALGOLIA_INDEX_NAME }}
         GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
         GA_ANONYMIZE_IP: ${{ secrets.GA_ANONYMIZE_IP }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         sbt clean \
           docusaurGenerateAlgoliaConfigFile \
           docusaurGenerateGoogleAnalyticsConfigFile \
           docusaurInstall \
           docusaurCleanBuild \
-          docusaurBuild \
-          publishToGitHubPages
+          docusaurBuild
