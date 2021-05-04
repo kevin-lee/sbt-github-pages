@@ -27,7 +27,7 @@ jobs:
             ~/.ivy2/cache
             ~/.cache/coursier
             ~/.sbt
-          key: ${{ runner.os }}-sbt-${{ env.GH_SCALA_BINARY_VERSION }}-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
+          key: ${{ runner.os }}-sbt-${{ env.GH_SCALA_BINARY_VERSION }}-${{ hashFiles('**/*.sbt') }}
           restore-keys: |
             ${{ runner.os }}-sbt-${{ env.GH_SCALA_BINARY_VERSION }}-
 
