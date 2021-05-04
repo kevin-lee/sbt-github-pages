@@ -51,40 +51,42 @@ e.g.) `.github/workflows/publish-github-pages.yml`
 name: Publish GitHub Pages
 
 on:
-  push:
-    branches:
-      - publish-docs
+  workflow_dispatch:
 
 jobs:
-  build:
+  build_and_publish_doc_site:
+    if: github.ref != 'refs/heads/gh-pages' && github.ref != 'gh-pages'
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        scala:
+          - { binary-version: "2.12", java-version: "adopt@1.11" }
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2.3.4
+      - uses: olafurpg/setup-scala@v10
         with:
-          node-version: '14.2.0'
+          java-version: ${{ matrix.scala.java-version }}
+      - uses: actions/setup-node@v2.1.5
+        with:
+          node-version: '14.4.0'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Cache Coursier
-        uses: actions/cache@v1
+      - name: Cache SBT
+        uses: actions/cache@v2
         with:
-          path: ~/.cache/coursier
-          key: ${{ runner.os }}-coursier-scala-2_13-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
+          path: |
+            ~/.ivy2/cache
+            ~/.cache/coursier
+            ~/.sbt
+          key: ${{ runner.os }}-sbt-${{ matrix.scala.binary-version }}-${{ hashFiles('**/*.sbt') }}
           restore-keys: |
-            ${{ runner.os }}-coursier-scala-2_13-
-
-      - name: Cache Ivy
-        uses: actions/cache@v1
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-ivy-scala-2_13-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/build.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-ivy-scala-2_13-
+            ${{ runner.os }}-sbt-${{ matrix.scala.binary-version }}-
 
       - name: Cache npm
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
