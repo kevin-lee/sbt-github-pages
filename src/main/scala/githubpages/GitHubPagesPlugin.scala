@@ -145,6 +145,8 @@ object GitHubPagesPlugin extends AutoPlugin {
     gitHubPagesIgnoreDotDirs := true,
     gitHubPagesAcceptedTextExtensions := GitHubApi.defaultTextExtensions,
     gitHubPagesAcceptedTextMaxLength := GitHubApi.defaultMaximumLength,
+    gitHubPagesOrgName := gitRemoteInfo._1,
+    gitHubPagesRepoName := gitRemoteInfo._2,
     publishToGitHubPages := Def.taskDyn {
 
       val siteDir = Data.SiteDir(gitHubPagesSiteDir.value)
@@ -246,5 +248,26 @@ object GitHubPagesPlugin extends AutoPlugin {
       }
     }.value
   )
+
+  /** Gets the Github user and repository from the git remote info */
+  private val gitRemoteInfo = {
+    import scala.sys.process._
+
+    val identifier = """([^\/]+?)"""
+    val GitHubHttps = s"https://github.com/$identifier/$identifier(?:\\.git)?".r
+    val GitHubGit   = s"git://github.com:$identifier/$identifier(?:\\.git)?".r
+    val GitHubSsh   = s"git@github.com:$identifier/$identifier(?:\\.git)?".r
+    try {
+      val remote = List("git", "ls-remote", "--get-url", "origin").!!.trim()
+      remote match {
+        case GitHubHttps(user, repo) => (user, repo)
+        case GitHubGit(user, repo)   => (user, repo)
+        case GitHubSsh(user, repo)   => (user, repo)
+        case _                       => ("", "")
+      }
+    } catch {
+      case NonFatal(_) => ("", "")
+    }
+  }
 
 }
