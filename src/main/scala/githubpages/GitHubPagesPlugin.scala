@@ -145,6 +145,8 @@ object GitHubPagesPlugin extends AutoPlugin {
     gitHubPagesIgnoreDotDirs := true,
     gitHubPagesAcceptedTextExtensions := GitHubApi.defaultTextExtensions,
     gitHubPagesAcceptedTextMaxLength := GitHubApi.defaultMaximumLength,
+    gitHubPagesOrgName := gitRemoteInfo._1,
+    gitHubPagesRepoName := gitRemoteInfo._2,
     publishToGitHubPages := Def.taskDyn {
 
       val siteDir = Data.SiteDir(gitHubPagesSiteDir.value)

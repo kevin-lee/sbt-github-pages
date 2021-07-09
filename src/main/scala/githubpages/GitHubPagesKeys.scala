@@ -46,10 +46,16 @@ trait GitHubPagesKeys {
     settingKey[Boolean]("The flag to decide whether to add .nojekyll (default: true)")
 
   lazy val gitHubPagesOrgName: SettingKey[String] =
-    settingKey[String]("The GitHub organization name (or username) (e.g. https://github.com/OrgName/RepoName)")
+    settingKey[String](
+      "The GitHub organization name (or username) (e.g. https://github.com/OrgName/RepoName) " +
+        "(default: information obtained from `git remote`)"
+    )
 
   lazy val gitHubPagesRepoName: SettingKey[String] =
-    settingKey[String]("The GitHub project repository name (e.g. https://github.com/OrgName/RepoName)")
+    settingKey[String](
+      "The GitHub project repository name (e.g. https://github.com/OrgName/RepoName) " +
+        "(default: information obtained from `git remote`)"
+    )
 
   lazy val gitHubPagesGitHubToken: SettingKey[Option[String]] =
     settingKey[Option[String]](

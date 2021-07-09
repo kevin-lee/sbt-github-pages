@@ -8,9 +8,11 @@ Add set `GitHubPagesPlugin` in the `build.sbt`.
 ## Essential settings
 You probably need only these three setting keys in your project config to publish GitHub Pages.
 ```scala
+gitHubPagesSiteDir := baseDirectory.value / "path/to/github-pages-root"
+
+// These aren't mandatory unless sbt-github-pages can't infer them from `git remote`
 gitHubPagesOrgName := "USERNAME_OR_ORG",
 gitHubPagesRepoName := "YOUR_PROJECT",
-gitHubPagesSiteDir := baseDirectory.value / "path/to/github-pages-root"
 ```
 
 e.g.)
@@ -32,11 +34,13 @@ lazy val root = (project in file("."))
 This key must be set by the user of this plugin.
 :::
 
-| Name                 | Value Type | Default    |
-| -------------------- | ---------- | ---------- |
-| `gitHubPagesOrgName` | `String`   |            |
+| Name                 | Value Type | Default                                  |
+| -------------------- | ---------- | ---------------------------------------- |
+| `gitHubPagesOrgName` | `String`   | Value obtained from calling `git remote` |
 
-The GitHub organization name (or username) (i.e.`OrgName` from `https://github.com/OrgName/RepoName`)
+The GitHub organization name (or username) (i.e.`OrgName` from `https://github.com/OrgName/RepoName`).
+
+Most of the times you won't need to set this setting, since `sbt-github-pages` will try to read it from the `git remote` information.
 
 e.g.)
 ```scala
@@ -50,11 +54,13 @@ gitHubPagesOrgName := "Kevin-Lee"
 This key must be set by the user of this plugin.
 :::
 
-| Name                  | Value Type | Default    |
-| --------------------- | ---------- | ---------- |
-| `gitHubPagesRepoName` | `String`  |            |
+| Name                  | Value Type | Default                                  |
+| --------------------- | ---------- | ---------------------------------------- |
+| `gitHubPagesRepoName` | `String`   | Value obtained from calling `git remote` |
 
-The GitHub project repository name (i.e. `RepoName` from `https://github.com/OrgName/RepoName`)
+The GitHub project repository name (i.e. `RepoName` from `https://github.com/OrgName/RepoName`).
+
+Most of the times you won't need to set this setting, since `sbt-github-pages` will try to read it from the `git remote` information.
 
 e.g.)
 ```scala
