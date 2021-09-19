@@ -6,17 +6,17 @@ lazy val root = (project in file("."))
   .enablePlugins(SbtPlugin, DevOopsGitHubReleasePlugin, DocusaurPlugin)
   .settings(
     organization := "io.kevinlee",
-    name := "sbt-github-pages",
+    name := props.ProjectName,
     scalaVersion := props.ProjectScalaVersion,
     description := "sbt plugin to publish GitHub Pages",
     developers := List(
-      Developer("Kevin-Lee", "Kevin Lee", "kevin.code@kevinlee.io", url("https://github.com/Kevin-Lee"))
+      Developer(props.Org, "Kevin Lee", "kevin.code@kevinlee.io", url(s"https://github.com/${props.Org}"))
     ),
-    homepage := url("https://github.com/Kevin-Lee/sbt-github-pages").some,
+    homepage := url(s"https://github.com/${props.Org}/${props.ProjectName}").some,
     scmInfo :=
       ScmInfo(
-        url("https://github.com/Kevin-Lee/sbt-github-pages"),
-        "git@github.com:Kevin-Lee/sbt-github-pages.git",
+        url(s"https://github.com/${props.Org}/${props.ProjectName}"),
+        s"git@github.com:${props.Org}/${props.ProjectName}.git",
       ).some,
     startYear := 2020.some,
     Global / sbtVersion := props.GlobalSbtVersion,
@@ -38,32 +38,35 @@ lazy val root = (project in file("."))
     /* Docs { */
     docusaurDir := (ThisBuild / baseDirectory).value / "website",
     docusaurBuildDir := docusaurDir.value / "build",
-    gitHubPagesOrgName := "Kevin-Lee",
-    gitHubPagesRepoName := "sbt-github-pages",
     /* } Docs */
 
   )
 
 lazy val props =
   new {
+    private val gitHubRepo = findRepoOrgAndName
+
     val ProjectScalaVersion: String     = "2.12.12"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
+
+    final val Org         = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
+    final val ProjectName = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
 
     val GlobalSbtVersion: String = "1.2.8"
 
     val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-    val hedgehogVersion: String = "0.6.7"
+    val hedgehogVersion: String = "0.7.0"
 
-    val catsVersion       = "2.6.0"
-    val catsEffectVersion = "2.5.0"
-    val github4sVersion   = "0.28.4"
-    val circeVersion      = "0.13.0"
+    val catsVersion       = "2.6.1"
+    val catsEffectVersion = "2.5.3"
+    val github4sVersion   = "0.28.5"
+    val circeVersion      = "0.14.1"
 
-    val http4sVersion: String = "0.21.22"
+    val http4sVersion: String = "0.21.27"
 
-    val effectieVersion = "1.10.0"
-    val loggerFVersion  = "1.10.0"
+    val effectieVersion = "1.15.0"
+    val loggerFVersion  = "1.15.0"
   }
 
 lazy val libs =
