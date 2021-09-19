@@ -10,7 +10,7 @@ import cats.effect._
 import cats.syntax.all._
 import effectie.cats.Effectful._
 import effectie.cats.Catching._
-import effectie.cats.{CanCatch, EffectConstructor}
+import effectie.cats.{CanCatch, Fx}
 
 import scala.annotation.tailrec
 
@@ -22,7 +22,7 @@ object FileF {
 
   final case class BufferSize(bufferSize: Int) extends AnyVal
 
-  def relativePathOf[F[_]: EffectConstructor: CanCatch: Monad](
+  def relativePathOf[F[_]: Fx: CanCatch: Monad](
     baseDir: File,
     file: File
   ): F[Either[FileError, String]] =
@@ -49,12 +49,12 @@ object FileF {
           )
     } yield relativePath).value
 
-  def getAllFiles[F[_]: EffectConstructor: Monad](
+  def getAllFiles[F[_]: Fx: Monad](
     dirs: Vector[File]
   ): F[Either[FileError, Vector[File]]] =
     getFiles(dirs, _ => true)
 
-  def getFiles[F[_]: EffectConstructor: Monad](
+  def getFiles[F[_]: Fx: Monad](
     dirs: Vector[File],
     fileFilter: File => Boolean
   ): F[Either[FileError, Vector[File]]] =
@@ -66,7 +66,7 @@ object FileF {
         } yield file).asRight[FileError]
       )
 
-  def getAllDirsRecursively[F[_]: EffectConstructor: Monad](
+  def getAllDirsRecursively[F[_]: Fx: Monad](
     rootDir: File,
     dirFilter: File => Boolean
   ): F[Either[FileError, Vector[File]]] = {
@@ -86,7 +86,7 @@ object FileF {
     effectOf(getAllSubDirs(Vector(rootDir), dirFilter, Vector.empty).asRight[FileError])
   }
 
-  def readBytesFromFile[F[_]: EffectConstructor: Monad: Sync](
+  def readBytesFromFile[F[_]: Fx: Monad: Sync](
     file: File,
     bufferSize: BufferSize
   ): F[Either[FileError, Array[Byte]]] = {

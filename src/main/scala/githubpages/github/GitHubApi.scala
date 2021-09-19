@@ -8,7 +8,7 @@ import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{ConcurrentEffect, Timer}
 import cats.syntax.all._
 import effectie.cats.EitherTSupport._
-import effectie.cats.{CanCatch, EffectConstructor}
+import effectie.cats.{CanCatch, Fx}
 import filef.FileF
 import github4s.domain._
 import github4s.{GHResponse, Github, GithubConfig}
@@ -47,7 +47,7 @@ object GitHubApi {
   private def githubWithAbuseRateLimit[F[_]: ConcurrentEffect: Timer](github: Github[F]): F[Github[F]] =
     Timer[F].sleep(1.second).as(github)
 
-  private def fetchHeadCommit[F[_]: EffectConstructor: Monad](
+  private def fetchHeadCommit[F[_]: Fx: Monad](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     branch: Data.Branch,
@@ -68,7 +68,7 @@ object GitHubApi {
         .toRight(GitHubError.branchNotFound(gitHubRepo, branch))
     }
 
-  private def updateHead[F[_]: EffectConstructor: Monad](
+  private def updateHead[F[_]: Fx: Monad](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     branch: Data.Branch,
@@ -85,7 +85,7 @@ object GitHubApi {
       )
     )
 
-  private def processResponse[F[_]: EffectConstructor: Functor, A](
+  private def processResponse[F[_]: Fx: Functor, A](
     response: F[GHResponse[A]]
   ): F[Either[GitHubError, A]] =
     response.map(
@@ -95,7 +95,7 @@ object GitHubApi {
     )
 
 
-  private def findBaseTreeCommit[F[_]: EffectConstructor: Monad](
+  private def findBaseTreeCommit[F[_]: Fx: Monad](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     commitSha: Option[Data.CommitSha],
@@ -109,7 +109,7 @@ object GitHubApi {
       ).map(Option(_))
     )
 
-  private def createTreeDataList[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer](
+  private def createTreeDataList[F[_]: Fx: CanCatch: Monad: ConcurrentEffect: Timer](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     baseDir: Data.BaseDir,
@@ -187,7 +187,7 @@ object GitHubApi {
     )
   }
 
-  private def createTree[F[_]: EffectConstructor: ConcurrentEffect: Timer: Monad](
+  private def createTree[F[_]: Fx: ConcurrentEffect: Timer: Monad](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     baseTreeSha: Option[String],
@@ -205,7 +205,7 @@ object GitHubApi {
         )
     } yield response
 
-  private def createCommit[F[_]: EffectConstructor: ConcurrentEffect: Monad: Timer: Monad](
+  private def createCommit[F[_]: Fx: ConcurrentEffect: Monad: Timer: Monad](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     commitMessage: Data.CommitMessage,
@@ -230,7 +230,7 @@ object GitHubApi {
         )
     } yield response
 
-  private def updateCommitFiles[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
+  private def updateCommitFiles[F[_]: Fx: CanCatch: Monad: ConcurrentEffect: Timer: Log](
     github: Github[F],
     commitInfo: CommitInfo,
     baseDir: Data.BaseDir,
@@ -266,7 +266,7 @@ object GitHubApi {
 
 
   @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
-  private[github] def commitAndPush0[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
+  private[github] def commitAndPush0[F[_]: Fx: CanCatch: Monad: ConcurrentEffect: Timer: Log](
     client: Client[F],
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
     branch: Data.Branch,
@@ -300,7 +300,7 @@ object GitHubApi {
   } yield headRef).value
 
   @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
-  def commitAndPush[F[_]: EffectConstructor: CanCatch: Monad: ConcurrentEffect: Timer: Log](
+  def commitAndPush[F[_]: Fx: CanCatch: Monad: ConcurrentEffect: Timer: Log](
     client: Client[F],
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
     branch: Data.Branch,
