@@ -5,18 +5,18 @@ lazy val prepareDocusaurusBuild: TaskKey[Unit] = taskKey[Unit]("Task to do some 
 lazy val root = (project in file("."))
   .enablePlugins(SbtPlugin, DevOopsGitHubReleasePlugin, DocusaurPlugin)
   .settings(
-    organization := "io.kevinlee",
+    organization := props.Org,
     name := props.ProjectName,
     scalaVersion := props.ProjectScalaVersion,
     description := "sbt plugin to publish GitHub Pages",
     developers := List(
-      Developer(props.Org, "Kevin Lee", "kevin.code@kevinlee.io", url(s"https://github.com/${props.Org}"))
+      Developer(props.GitHubUsername, "Kevin Lee", "kevin.code@kevinlee.io", url(s"https://github.com/${props.GitHubUsername}"))
     ),
-    homepage := url(s"https://github.com/${props.Org}/${props.ProjectName}").some,
+    homepage := url(s"https://github.com/${props.GitHubUsername}/${props.ProjectName}").some,
     scmInfo :=
       ScmInfo(
-        url(s"https://github.com/${props.Org}/${props.ProjectName}"),
-        s"git@github.com:${props.Org}/${props.ProjectName}.git",
+        url(s"https://github.com/${props.GitHubUsername}/${props.ProjectName}"),
+        s"git@github.com:${props.GitHubUsername}/${props.ProjectName}.git",
       ).some,
     startYear := 2020.some,
     Global / sbtVersion := props.GlobalSbtVersion,
@@ -46,27 +46,29 @@ lazy val props =
   new {
     private val gitHubRepo = findRepoOrgAndName
 
-    val ProjectScalaVersion: String     = "2.12.12"
+    final val Org = "io.kevinlee"
+
+    final val ProjectScalaVersion     = "2.12.12"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
-    final val Org         = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
+    final val GitHubUsername         = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
     final val ProjectName = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
 
-    val GlobalSbtVersion: String = "1.2.8"
+    final val GlobalSbtVersion = "1.2.8"
 
     val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-    val hedgehogVersion: String = "0.7.0"
+    final val hedgehogVersion = "0.7.0"
 
-    val catsVersion       = "2.6.1"
-    val catsEffectVersion = "2.5.3"
-    val github4sVersion   = "0.28.5"
-    val circeVersion      = "0.14.1"
+    final val catsVersion       = "2.6.1"
+    final val catsEffectVersion = "2.5.3"
+    final val github4sVersion   = "0.28.5"
+    final val circeVersion      = "0.14.1"
 
-    val http4sVersion: String = "0.21.27"
+    final val http4sVersion = "0.21.27"
 
-    val effectieVersion = "1.15.0"
-    val loggerFVersion  = "1.15.0"
+    final val effectieVersion = "1.15.0"
+    final val loggerFVersion  = "1.15.0"
   }
 
 lazy val libs =
