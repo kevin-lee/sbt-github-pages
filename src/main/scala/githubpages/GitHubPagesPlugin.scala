@@ -195,9 +195,11 @@ object GitHubPagesPlugin extends AutoPlugin {
                 )
               )
             result <- BlazeClientBuilder[IO](ec).resource.use { client =>
-                for {
-                  gitHubRepo <- IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken))
-                  _ <- if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit
+                (for {
+                  gitHubRepo <- IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken)).rightT[GitHubError]
+                  pageBranchExists <- GitHubApi.doesBranchExist[IO](client, gitHubRepo, Data.Branch(gitHubPagesPublishBranch.gitHubPagesBranch)).rightT[GitHubError]
+                  _ <- if (pageBranchExists) IO.unit.rightT else IO(GitHubError.pagePublishBranchNotExist(gitHubRepo.gitHubRepo, gitHubPagesPublishBranch)).leftT[Unit]
+                  _ <- (if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit).rightT
                   result <- pushToGhPages[IO](
                       client,
                       gitHubApiConfig,
@@ -208,8 +210,8 @@ object GitHubPagesPlugin extends AutoPlugin {
                       dirFilter,
                       GitHubApi.buildIsText(blobConfig),
                       GitHubApi.essentialHeaders
-                    )
-                } yield result
+                    ).eitherT
+                } yield result).value
               }
           } yield result).unsafeRunSync() match {
             case Right(Some(ref)) =>
