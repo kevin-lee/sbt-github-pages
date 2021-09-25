@@ -1,11 +1,12 @@
 package githubpages.github
 
 import java.io.File
-
 import errors.StackTraceToString
 import filef.FileError
 import github4s.GHError
-import githubpages.github.Data.{Branch, GitHubRepo}
+import githubpages.github.Data.{Branch, GitHubPagesBranch, GitHubRepo}
+
+import scala.io.AnsiColor
 
 /**
  * @author Kevin Lee
@@ -50,6 +51,7 @@ object GitHubError {
       new BranchNotFound(gitHubRepo, branch)
   }
 
+  final case class PagePublishBranchNotExist(gitHubRepo: GitHubRepo, branch: GitHubPagesBranch) extends GitHubError
 
   def nonFatalThrowable(message: String, throwable: Throwable): GitHubError =
     NonFatalThrowable(message, throwable)
@@ -63,6 +65,9 @@ object GitHubError {
   def fileHandling(forWhat: => String)(fileError: FileError): GitHubError = FileHandling(forWhat, fileError)
 
   def branchNotFound(gitHubRepo: GitHubRepo, branch: Branch): GitHubError = BranchNotFound(gitHubRepo, branch)
+
+  def pagePublishBranchNotExist(gitHubRepo: GitHubRepo, branch: GitHubPagesBranch): GitHubError =
+    PagePublishBranchNotExist(gitHubRepo, branch)
 
   def render(gitHubError: GitHubError): String = gitHubError match {
     case NonFatalThrowable(message, throwable) =>
@@ -82,6 +87,14 @@ object GitHubError {
 
     case BranchNotFound(gitHubRepo, branch) =>
       s"GitHubError: The branch '${branch.branch}' is not found in the GitHub repo at ${gitHubRepo.org.org}/${gitHubRepo.repo.repo}."
+
+    case PagePublishBranchNotExist(gitHubRepo, branch) =>
+      s"""
+         |GitHubError: The branch '${AnsiColor.GREEN}${branch.gitHubPagesBranch}${AnsiColor.RESET}' for publishing GitHub pages ${AnsiColor.GREEN}does not exist${AnsiColor.RESET} at ${gitHubRepo.org.org}/${gitHubRepo.repo.repo}.
+         |You need to create it before publishing the doc site.
+         |To create it, please ${AnsiColor.BLUE}visit the following link${AnsiColor.RESET} and read sbt-github-pages document.
+         |${AnsiColor.BLUE}https://sbt-github-pages.kevinly.dev/docs/run#create-gh-pages-branch${AnsiColor.RESET}
+         |""".stripMargin
   }
 
 }

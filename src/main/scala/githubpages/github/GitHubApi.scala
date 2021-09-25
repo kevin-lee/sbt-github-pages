@@ -2,16 +2,15 @@ package githubpages.github
 
 import java.io.File
 import java.util.Base64
-
 import cats._
 import cats.data.{EitherT, NonEmptyVector}
-import cats.effect.{ConcurrentEffect, Timer}
+import cats.effect.{ConcurrentEffect, Sync, Timer}
 import cats.syntax.all._
 import effectie.cats.EitherTSupport._
 import effectie.cats.{CanCatch, Fx}
 import filef.FileF
 import github4s.domain._
-import github4s.{GHResponse, Github, GithubConfig}
+import github4s.{GHError, GHResponse, Github, GithubConfig}
 import githubpages.github.Data.{CommitInfo, GitHubApiConfig}
 import loggerf.cats._
 import loggerf.syntax._
@@ -19,13 +18,12 @@ import org.http4s.client.Client
 
 import scala.concurrent.duration._
 
-/**
- * @author Kevin Lee
- * @since 2020-05-27
- */
+/** @author Kevin Lee
+  * @since 2020-05-27
+  */
 object GitHubApi {
 
-  val base64: Base64.Encoder = Base64.getEncoder
+  val base64: Base64.Encoder         = Base64.getEncoder
   val base64Encoding: Option[String] = "base64".some
 
   val essentialHeaders: Map[String, String] = Map("user-agent" -> "sbt-github-pages")
@@ -33,9 +31,8 @@ object GitHubApi {
   val blobMode: String = "100644"
   val blobType: String = "blob"
 
-  val defaultTextExtensions: Set[String] =
-    Set(".md", ".css", ".html", ".xml", ".js", ".txt")
-  val defaultMaximumLength: Int = 10240
+  val defaultTextExtensions: Set[String] = Set(".md", ".css", ".html", ".xml", ".js", ".txt")
+  val defaultMaximumLength: Int          = 10240
 
   val defaultBlobConfig: Data.BlobConfig = Data.BlobConfig(defaultTextExtensions, defaultMaximumLength)
 
@@ -51,20 +48,23 @@ object GitHubApi {
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     branch: Data.Branch,
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, Ref] =
     EitherT(
       processResponse(
-        github.gitData.getReference(
-          gitHubRepo.org.org,
-          gitHubRepo.repo.repo,
-          s"heads/${branch.branch}",
-          pagination = none,
-          headers
-        )
+        github
+          .gitData
+          .getReference(
+            gitHubRepo.org.org,
+            gitHubRepo.repo.repo,
+            s"heads/${branch.branch}",
+            pagination = none,
+            headers,
+          )
       )
     ).subflatMap { refs =>
-      refs.find(_.ref === s"refs/heads/${branch.branch}")
+      refs
+        .find(_.ref === s"refs/heads/${branch.branch}")
         .toRight(GitHubError.branchNotFound(gitHubRepo, branch))
     }
 
@@ -73,15 +73,20 @@ object GitHubApi {
     gitHubRepo: Data.GitHubRepo,
     branch: Data.Branch,
     commitSha: Data.CommitSha,
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, Ref] =
     EitherT(
       processResponse(
-        github.gitData.updateReference(
-          gitHubRepo.org.org,
-          gitHubRepo.repo.repo,
-          s"heads/${branch.branch}", commitSha.commitSha, force = false, headers
-        )
+        github
+          .gitData
+          .updateReference(
+            gitHubRepo.org.org,
+            gitHubRepo.repo.repo,
+            s"heads/${branch.branch}",
+            commitSha.commitSha,
+            force = false,
+            headers,
+          )
       )
     )
 
@@ -89,17 +94,14 @@ object GitHubApi {
     response: F[GHResponse[A]]
   ): F[Either[GitHubError, A]] =
     response.map(
-      _.result.leftMap(err =>
-        GitHubError.requestFailure(err)
-      )
+      _.result.leftMap(err => GitHubError.requestFailure(err))
     )
-
 
   private def findBaseTreeCommit[F[_]: Fx: Monad](
     github: Github[F],
     gitHubRepo: Data.GitHubRepo,
     commitSha: Option[Data.CommitSha],
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, Option[RefCommit]] =
     commitSha.flatTraverse(sha =>
       EitherT(
@@ -115,7 +117,7 @@ object GitHubApi {
     baseDir: Data.BaseDir,
     files: List[File],
     isText: Data.IsText,
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, List[TreeData]] = {
 
     def treeDataWithBase64Encoding(
@@ -123,24 +125,25 @@ object GitHubApi {
       gitHubRepo: Data.GitHubRepo,
       filePath: String,
       bytes: Array[Byte],
-      headers: Map[String, String]
+      headers: Map[String, String],
     ): EitherT[F, GitHubError, TreeData] =
       for {
         githubWithRateLimit <- eitherTRightF(githubWithAbuseRateLimit(github))
-        response <- EitherT(
-            processResponse(
-              githubWithRateLimit.gitData.createBlob(
-                gitHubRepo.org.org,
-                gitHubRepo.repo.repo,
-                base64.encodeToString(bytes),
-                base64Encoding,
-                headers
-              )
-            )
-          )
-          .map(refInfo => TreeDataSha(filePath, blobMode, blobType, refInfo.sha): TreeData)
+        response            <- EitherT(
+                                 processResponse(
+                                   githubWithRateLimit
+                                     .gitData
+                                     .createBlob(
+                                       gitHubRepo.org.org,
+                                       gitHubRepo.repo.repo,
+                                       base64.encodeToString(bytes),
+                                       base64Encoding,
+                                       headers,
+                                     )
+                                 )
+                               )
+                                 .map(refInfo => TreeDataSha(filePath, blobMode, blobType, refInfo.sha): TreeData)
       } yield response
-
 
     def createTreeData(
       github: Github[F],
@@ -149,7 +152,7 @@ object GitHubApi {
       filePath: String,
       bytes: Array[Byte],
       isText: Data.IsText,
-      headers: Map[String, String]
+      headers: Map[String, String],
     ): EitherT[F, GitHubError, TreeData] =
       if (isText(file, bytes))
         eitherTRightPure[GitHubError](
@@ -164,27 +167,25 @@ object GitHubApi {
       baseDir: Data.BaseDir,
       file: File,
       isText: Data.IsText,
-      headers: Map[String, String]
+      headers: Map[String, String],
     ): EitherT[F, GitHubError, TreeData] =
       for {
         filePath <- EitherT(FileF.relativePathOf(baseDir.baseDir, file))
-            .leftMap(
-              GitHubError.fileHandling(
-                s"getting relative path to process {file: $file} with {baseDir: ${baseDir.baseDir}}"
-              )
-            )
-        bytes <- EitherT(FileF.readBytesFromFile(file, FileF.BufferSize(2048)))
-            .leftMap(
-              GitHubError.fileHandling(
-                s"reading bytes from [file: $file] with BufferSize(2048)"
-              )
-            )
+                      .leftMap(
+                        GitHubError.fileHandling(
+                          s"getting relative path to process {file: $file} with {baseDir: ${baseDir.baseDir}}"
+                        )
+                      )
+        bytes    <- EitherT(FileF.readBytesFromFile(file, FileF.BufferSize(2048)))
+                      .leftMap(
+                        GitHubError.fileHandling(
+                          s"reading bytes from [file: $file] with BufferSize(2048)"
+                        )
+                      )
         treeData <- createTreeData(github, gitHubRepo, file, filePath, bytes, isText, headers)
       } yield treeData
 
-    files.traverse(file =>
-      processFile(github, gitHubRepo, baseDir, file, isText, headers)
-    )
+    files.traverse(file => processFile(github, gitHubRepo, baseDir, file, isText, headers))
   }
 
   private def createTree[F[_]: Fx: ConcurrentEffect: Timer: Monad](
@@ -192,17 +193,23 @@ object GitHubApi {
     gitHubRepo: Data.GitHubRepo,
     baseTreeSha: Option[String],
     treeData: List[TreeData],
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, TreeResult] =
     for {
       githubWithRateLimit <- eitherTRightF(githubWithAbuseRateLimit(github))
-      response <- EitherT(
-          processResponse(
-            githubWithRateLimit.gitData.createTree(
-              gitHubRepo.org.org, gitHubRepo.repo.repo, baseTreeSha, treeData, headers
-            )
-          )
-        )
+      response            <- EitherT(
+                               processResponse(
+                                 githubWithRateLimit
+                                   .gitData
+                                   .createTree(
+                                     gitHubRepo.org.org,
+                                     gitHubRepo.repo.repo,
+                                     baseTreeSha,
+                                     treeData,
+                                     headers,
+                                   )
+                               )
+                             )
     } yield response
 
   private def createCommit[F[_]: Fx: ConcurrentEffect: Monad: Timer: Monad](
@@ -211,23 +218,25 @@ object GitHubApi {
     commitMessage: Data.CommitMessage,
     treeResultSha: Data.TreeResultSha,
     parentCommitSha: Data.CommitSha,
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, RefCommit] =
     for {
       githubWithRateLimit <- eitherTRightF(githubWithAbuseRateLimit(github))
-      response <- EitherT(processResponse(
-            githubWithRateLimit.gitData
-              .createCommit(
-                gitHubRepo.org.org,
-                gitHubRepo.repo.repo,
-                commitMessage.commitMessage,
-                treeResultSha.treeResultSha,
-                List(parentCommitSha.commitSha),
-                author = none,
-                headers
-              )
-          )
-        )
+      response            <- EitherT(
+                               processResponse(
+                                 githubWithRateLimit
+                                   .gitData
+                                   .createCommit(
+                                     gitHubRepo.org.org,
+                                     gitHubRepo.repo.repo,
+                                     commitMessage.commitMessage,
+                                     treeResultSha.treeResultSha,
+                                     List(parentCommitSha.commitSha),
+                                     author = none,
+                                     headers,
+                                   )
+                               )
+                             )
     } yield response
 
   private def updateCommitFiles[F[_]: Fx: CanCatch: Monad: ConcurrentEffect: Timer: Log](
@@ -237,33 +246,31 @@ object GitHubApi {
     allFiles: Vector[File],
     isText: Data.IsText,
     commitSha: Option[Data.CommitSha],
-    headers: Map[String, String]
+    headers: Map[String, String],
   ): EitherT[F, GitHubError, Option[Data.CommitSha]] =
     if (allFiles.isEmpty) {
       eitherTRight[GitHubError](commitSha)
     } else {
       for {
-        parentCommitSha <- commitSha.fold(
+        parentCommitSha       <-
+          commitSha.fold(
             fetchHeadCommit(github, commitInfo.gitHubRepo, commitInfo.branch, headers)
-              .map (ref => Data.CommitSha (ref.`object`.sha))
-          )(
-            sha => eitherTRightPure[GitHubError](sha)
-          )
-        maybeBaseTreeCommit <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
+              .map(ref => Data.CommitSha(ref.`object`.sha))
+          )(sha => eitherTRightPure[GitHubError](sha))
+        maybeBaseTreeCommit   <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
         maybeBaseTreeCommitSha = maybeBaseTreeCommit.map(_.tree.sha)
-        treeDataList <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isText, headers)
-        treeResult <- createTree(github, commitInfo.gitHubRepo, maybeBaseTreeCommitSha, treeDataList, headers)
-        refCommit <- createCommit(
-            github,
-            commitInfo.gitHubRepo,
-            commitInfo.commitMessage,
-            Data.TreeResultSha.fromTreeResult(treeResult),
-            parentCommitSha,
-            headers
-          )
+        treeDataList          <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isText, headers)
+        treeResult            <- createTree(github, commitInfo.gitHubRepo, maybeBaseTreeCommitSha, treeDataList, headers)
+        refCommit             <- createCommit(
+                                   github,
+                                   commitInfo.gitHubRepo,
+                                   commitInfo.commitMessage,
+                                   Data.TreeResultSha.fromTreeResult(treeResult),
+                                   parentCommitSha,
+                                   headers,
+                                 )
       } yield Data.CommitSha(refCommit.sha).some
     }
-
 
   @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
   private[github] def commitAndPush0[F[_]: Fx: CanCatch: Monad: ConcurrentEffect: Timer: Log](
@@ -274,11 +281,12 @@ object GitHubApi {
     commitMessage: Data.CommitMessage,
     allDirs: NonEmptyVector[File],
     isText: Data.IsText,
-    headers: Map[String, String]
+    headers: Map[String, String],
   )(implicit githubConfig: GithubConfig): F[Either[GitHubError, Option[Ref]]] = (for {
-    github <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
+    github    <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     commitInfo = Data.CommitInfo(gitHubRepoWithAuth.gitHubRepo, branch, commitMessage)
-    allFiles <- log(
+    allFiles  <-
+      log(
         EitherT(FileF.getAllFiles(allDirs.toVector))
           .leftMap(GitHubError.fileHandling("getting all files to update commit dir"))
       )(
@@ -290,13 +298,11 @@ object GitHubApi {
             else
               files.mkString("[\n  ", "\n  ", "\n]")
           debug(s"Files to commit: $message")
-        }
+        },
       )
-    refCommit <-
-      updateCommitFiles(github, commitInfo, baseDir, allFiles, isText, none[Data.CommitSha], headers)
-    headRef <- refCommit.traverse(commitSha =>
-        updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers)
-      )
+    refCommit <- updateCommitFiles(github, commitInfo, baseDir, allFiles, isText, none[Data.CommitSha], headers)
+    headRef   <-
+      refCommit.traverse(commitSha => updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers))
   } yield headRef).value
 
   @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
@@ -308,10 +314,31 @@ object GitHubApi {
     commitMessage: Data.CommitMessage,
     allDirs: NonEmptyVector[File],
     isText: Data.IsText,
-    headers: Map[String, String]
+    headers: Map[String, String],
   )(gitHubApiConfig: GitHubApiConfig): F[Either[GitHubError, Option[Ref]]] = {
     implicit val githubConfig = GitHubApiConfig.toGithubConfig(gitHubApiConfig)
     commitAndPush0(client, gitHubRepoWithAuth, branch, baseDir, commitMessage, allDirs, isText, headers)
   }
+
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
+  def doesBranchExist[F[_]: Fx: Monad: Sync](
+    client: Client[F],
+    gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
+    branch: Data.Branch,
+  )(implicit githubConfig: GithubConfig): F[Boolean] = (for {
+    github <- Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)).rightTF[F, GHError]
+    res    <- github
+                .repos
+                .listBranches(
+                  gitHubRepoWithAuth.gitHubRepo.org.org,
+                  gitHubRepoWithAuth.gitHubRepo.repo.repo,
+                  none,
+                  none,
+                  Map.empty,
+                )
+                .rightT[GHError]
+    result <- res.result.eitherT[F]
+  } yield result.exists(_.name.equalsIgnoreCase(branch.branch)))
+    .getOrElse(false)
 
 }
