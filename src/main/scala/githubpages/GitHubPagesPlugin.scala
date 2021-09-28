@@ -27,13 +27,12 @@ import sbt.{IO => SbtIo, _}
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
-/**
- * @author Kevin Lee
- * @since 2020-05-26
- */
+/** @author Kevin Lee
+  * @since 2020-05-26
+  */
 object GitHubPagesPlugin extends AutoPlugin {
 
-  override def requires: Plugins = empty
+  override def requires: Plugins      = empty
   override def trigger: PluginTrigger = noTrigger
 
   object autoImport extends GitHubPagesKeys
@@ -50,7 +49,6 @@ object GitHubPagesPlugin extends AutoPlugin {
     aToString: A => String
   ): B =
     aOrB.fold(a => throw new MessageOnlyException(aToString(a)), identity)
-
 
   private def pushToGhPages[F[_]: Fx: CanCatch: CatsSync: ConcurrentEffect: Timer: LogF](
     client: Client[F],
@@ -71,46 +69,49 @@ object GitHubPagesPlugin extends AutoPlugin {
     ).leftMap {
       case NonFatal(err) =>
         GitHubError.nonFatalThrowable("Error fetching files recursively", err)
-    }
-    .flatMap {
+    }.flatMap {
       case Vector() =>
         eitherTOfPure(
-          GitHubError.messageOnly(
-            s"No files to commit in the dir at ${siteDir.siteDir.getCanonicalPath}"
-          ).asLeft[Option[Ref]]
+          GitHubError
+            .messageOnly(
+              s"No files to commit in the dir at ${siteDir.siteDir.getCanonicalPath}"
+            )
+            .asLeft[Option[Ref]]
         )
 
       case x +: xs =>
-          for {
-            dirs <- eitherTRightPure(NonEmptyVector(x, xs))
-            _ <- log(
-                EitherT(FileF.getAllFiles[F](dirs.toVector))
-                  .leftMap(
-                    GitHubError.fileHandling(
-                      s"getting all files in ${dirs.toVector.mkString("[", ",", "]")} to push to GitHub Pages"
+        for {
+          dirs <- eitherTRightPure(NonEmptyVector(x, xs))
+          _    <- log(
+                    EitherT(FileF.getAllFiles[F](dirs.toVector))
+                      .leftMap(
+                        GitHubError.fileHandling(
+                          s"getting all files in ${dirs.toVector.mkString("[", ",", "]")} to push to GitHub Pages"
+                        )
+                      )
+                  )(
+                    err => error(GitHubError.render(err)),
+                    files =>
+                      info(
+                        s"""The following allDirs will be pushed to '${gitHubPagesBranch.gitHubPagesBranch}' branch.
+                           |${files.mkString("  - ", "\n  - ", "")}
+                           |""".stripMargin
+                      )
+                  )
+
+          result <- EitherT(
+                      GitHubApi.commitAndPush[F](
+                        client,
+                        gitHubRepo,
+                        Data.Branch(gitHubPagesBranch.gitHubPagesBranch),
+                        Data.BaseDir(siteDir.siteDir),
+                        commitMessage,
+                        dirs,
+                        isText,
+                        headers
+                      )(gitHubApiConfig)
                     )
-                  )
-              )(
-                err => error(GitHubError.render(err)),
-                files => info(
-                    s"""The following allDirs will be pushed to '${gitHubPagesBranch.gitHubPagesBranch}' branch.
-                       |${files.mkString("  - ", "\n  - ", "")}
-                       |""".stripMargin
-                  )
-              )
-            result <- EitherT(
-                GitHubApi.commitAndPush[F](
-                  client,
-                  gitHubRepo,
-                  Data.Branch(gitHubPagesBranch.gitHubPagesBranch),
-                  Data.BaseDir(siteDir.siteDir),
-                  commitMessage,
-                  dirs,
-                  isText,
-                  headers
-                )(gitHubApiConfig)
-              )
-          } yield result
+        } yield result
     }.value
 
   private def decodeJsonToMapOfStringToString(message: String)(jsonString: String): Map[String, String] = {
@@ -127,46 +128,56 @@ object GitHubPagesPlugin extends AutoPlugin {
   }
 
   override lazy val globalSettings: Seq[Def.Setting[_]] = Seq(
-    gitHubPagesBranch := "gh-pages",
-    gitHubPagesNoJekyll := true,
+    gitHubPagesBranch               := "gh-pages",
+    gitHubPagesNoJekyll             := true,
     gitHubPagesPublishCommitMessage :=
       sys.env.getOrElse("GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE", s"Updated ${gitHubPagesBranch.value}"),
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
-    gitHubPagesGitHubBaseUrl := sys.env.getOrElse("GITHUB_ENT_BASE_URL", GitHubApiConfig.default.baseUrl.baseUrl),
-    gitHubPagesGitHubAuthorizeUrl := sys.env.getOrElse("GITHUB_ENT_AUTHORIZE_URL", GitHubApiConfig.default.authorizeUrl.authorizeUrl),
-    gitHubPagesGitHubAccessTokenUrl := sys.env.getOrElse("GITHUB_ENT_ACCESS_TOKEN_URL", GitHubApiConfig.default.accessTokenUrl.accessTokenUrl),
-    gitHubPagesGitHubHeaders :=
-      sys.env.get("GITHUB_ENT_HEADERS")
-        .fold(GitHubApiConfig.default.headers.headers)(decodeJsonToMapOfStringToString("for the environment variable 'GITHUB_ENT_HEADERS'")),
-    gitHubPagesGitHubToken := sys.env.get("GITHUB_TOKEN"),
-    gitHubPagesDirsToIgnore := defaultDirNamesShouldBeIgnored,
-    gitHubPagesIgnoreDotDirs := true,
+    gitHubPagesGitHubBaseUrl          := sys.env.getOrElse("GITHUB_ENT_BASE_URL", GitHubApiConfig.default.baseUrl.baseUrl),
+    gitHubPagesGitHubAuthorizeUrl     := sys
+      .env
+      .getOrElse("GITHUB_ENT_AUTHORIZE_URL", GitHubApiConfig.default.authorizeUrl.authorizeUrl),
+    gitHubPagesGitHubAccessTokenUrl   := sys
+      .env
+      .getOrElse("GITHUB_ENT_ACCESS_TOKEN_URL", GitHubApiConfig.default.accessTokenUrl.accessTokenUrl),
+    gitHubPagesGitHubHeaders          :=
+      sys
+        .env
+        .get("GITHUB_ENT_HEADERS")
+        .fold(GitHubApiConfig.default.headers.headers)(
+          decodeJsonToMapOfStringToString("for the environment variable 'GITHUB_ENT_HEADERS'")
+        ),
+    gitHubPagesGitHubToken            := sys.env.get("GITHUB_TOKEN"),
+    gitHubPagesDirsToIgnore           := defaultDirNamesShouldBeIgnored,
+    gitHubPagesIgnoreDotDirs          := true,
     gitHubPagesAcceptedTextExtensions := GitHubApi.defaultTextExtensions,
-    gitHubPagesAcceptedTextMaxLength := GitHubApi.defaultMaximumLength,
-    gitHubPagesOrgName := gitRemoteInfo._1,
-    gitHubPagesRepoName := gitRemoteInfo._2,
-    publishToGitHubPages := Def.taskDyn {
+    gitHubPagesAcceptedTextMaxLength  := GitHubApi.defaultMaximumLength,
+    gitHubPagesOrgName                := gitRemoteInfo._1,
+    gitHubPagesRepoName               := gitRemoteInfo._2,
+    publishToGitHubPages              := Def.taskDyn {
 
-      val siteDir = Data.SiteDir(gitHubPagesSiteDir.value)
-      val noJekyll = gitHubPagesNoJekyll.value
       val gitHubPagesPublishBranch = Data.GitHubPagesBranch(gitHubPagesBranch.value)
-      val gitHubRepoOrg = Data.GitHubRepo.Org(gitHubPagesOrgName.value)
+
+      val siteDir        = Data.SiteDir(gitHubPagesSiteDir.value)
+      val noJekyll       = gitHubPagesNoJekyll.value
+      val gitHubRepoOrg  = Data.GitHubRepo.Org(gitHubPagesOrgName.value)
       val gitHubRepoRepo = Data.GitHubRepo.Repo(gitHubPagesRepoName.value)
-      val gitHubToken = gitHubPagesGitHubToken.value.map(Data.GitHubRepoWithAuth.AccessToken)
-      val commitMessage = Data.CommitMessage(gitHubPagesPublishCommitMessage.value)
-      val dirsToIgnore = gitHubPagesDirsToIgnore.value
-      val ignoreDotDirs = gitHubPagesIgnoreDotDirs.value
-      val dirFilter =
+      val gitHubToken    = gitHubPagesGitHubToken.value.map(Data.GitHubRepoWithAuth.AccessToken)
+      val commitMessage  = Data.CommitMessage(gitHubPagesPublishCommitMessage.value)
+      val dirsToIgnore   = gitHubPagesDirsToIgnore.value
+      val ignoreDotDirs  = gitHubPagesIgnoreDotDirs.value
+      val dirFilter      =
         if (ignoreDotDirs)
           (dir: File) => !(dirsToIgnore.contains(dir.getName.toLowerCase) || dir.getName.startsWith("."))
         else
           (dir: File) => !dirsToIgnore.contains(dir.getName.toLowerCase)
 
       val textExtensions = gitHubPagesAcceptedTextExtensions.value
-      val textMaxLength = gitHubPagesAcceptedTextMaxLength.value
-      val blobConfig = Data.BlobConfig(textExtensions, textMaxLength)
+      val textMaxLength  = gitHubPagesAcceptedTextMaxLength.value
+      val blobConfig     = Data.BlobConfig(textExtensions, textMaxLength)
+
       val gitHubApiConfig: GitHubApiConfig = GitHubApiConfig(
         baseUrl = GitHubApiConfig.BaseUrl(gitHubPagesGitHubBaseUrl.value),
         authorizeUrl = GitHubApiConfig.AuthorizeUrl(gitHubPagesGitHubAuthorizeUrl.value),
@@ -176,7 +187,7 @@ object GitHubPagesPlugin extends AutoPlugin {
 
       implicit val ec: ExecutionContext = ExecutionContext.global
       implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-      implicit val timer: Timer[IO] = IO.timer(ec)
+      implicit val timer: Timer[IO]     = IO.timer(ec)
 
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 
@@ -185,32 +196,42 @@ object GitHubPagesPlugin extends AutoPlugin {
         val publishToGitHubPagesTask = Def.task {
           (for {
             commitMessage <- IO.pure(commitMessage)
-            _ <- IO(
-                log.info(
-                  s"""Committing files from ${siteDir.siteDir.getCanonicalPath}
-                     |  into the branch to publish GitHub Pages (i.e. '${gitHubPagesPublishBranch.gitHubPagesBranch}')
-                     |  * repo: ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}
-                     |  * commit-message: ${commitMessage.commitMessage}
-                     |""".stripMargin
-                )
-              )
-            result <- BlazeClientBuilder[IO](ec).resource.use { client =>
+            _             <- IO(
+                               log.info(
+                                 s"""Committing files from ${siteDir.siteDir.getCanonicalPath}
+                                    |  into the branch to publish GitHub Pages (i.e. '${gitHubPagesPublishBranch.gitHubPagesBranch}')
+                                    |  * repo: ${gitHubRepoOrg.org}/${gitHubRepoRepo.repo}
+                                    |  * commit-message: ${commitMessage.commitMessage}
+                                    |""".stripMargin
+                               )
+                             )
+            result        <-
+              BlazeClientBuilder[IO](ec).resource.use { client =>
                 (for {
-                  gitHubRepo <- IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken)).rightT[GitHubError]
-                  pageBranchExists <- GitHubApi.doesBranchExist[IO](client, gitHubRepo, Data.Branch(gitHubPagesPublishBranch.gitHubPagesBranch)).rightT[GitHubError]
-                  _ <- if (pageBranchExists) IO.unit.rightT else IO(GitHubError.pagePublishBranchNotExist(gitHubRepo.gitHubRepo, gitHubPagesPublishBranch)).leftT[Unit]
-                  _ <- (if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit).rightT
+                  gitHubRepo       <-
+                    IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken))
+                      .rightT[GitHubError]
+                  pageBranchExists <-
+                    GitHubApi
+                      .doesBranchExist[IO](client, gitHubRepo, Data.Branch(gitHubPagesPublishBranch.gitHubPagesBranch))
+                      .rightT[GitHubError]
+
+                  _      <- if (pageBranchExists) IO.unit.rightT
+                            else
+                              IO(GitHubError.pagePublishBranchNotExist(gitHubRepo.gitHubRepo, gitHubPagesPublishBranch))
+                                .leftT[Unit]
+                  _      <- (if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit).rightT
                   result <- pushToGhPages[IO](
-                      client,
-                      gitHubApiConfig,
-                      gitHubRepo,
-                      gitHubPagesPublishBranch,
-                      commitMessage,
-                      siteDir,
-                      dirFilter,
-                      GitHubApi.buildIsText(blobConfig),
-                      GitHubApi.essentialHeaders
-                    ).eitherT
+                              client,
+                              gitHubApiConfig,
+                              gitHubRepo,
+                              gitHubPagesPublishBranch,
+                              commitMessage,
+                              siteDir,
+                              dirFilter,
+                              GitHubApi.buildIsText(blobConfig),
+                              GitHubApi.essentialHeaders
+                            ).eitherT
                 } yield result).value
               }
           } yield result).unsafeRunSync() match {
@@ -255,7 +276,7 @@ object GitHubPagesPlugin extends AutoPlugin {
   private val gitRemoteInfo = {
     import scala.sys.process._
 
-    val identifier = """([^\/]+?)"""
+    val identifier  = """([^\/]+?)"""
     val GitHubHttps = s"https://github.com/$identifier/$identifier(?:\\.git)?".r
     val GitHubGit   = s"git://github.com:$identifier/$identifier(?:\\.git)?".r
     val GitHubSsh   = s"git@github.com:$identifier/$identifier(?:\\.git)?".r
