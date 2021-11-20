@@ -1,7 +1,5 @@
 package githubpages.github
 
-import java.io.File
-import java.util.Base64
 import cats._
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{ConcurrentEffect, Sync, Timer}
@@ -10,12 +8,16 @@ import effectie.cats.EitherTSupport._
 import effectie.cats.{CanCatch, Fx}
 import filef.FileF
 import github4s.domain._
+import github4s.http.HttpClient
+import github4s.interpreters.StaticAccessToken
 import github4s.{GHError, GHResponse, Github, GithubConfig}
 import githubpages.github.Data.{CommitInfo, GitHubApiConfig}
 import loggerf.cats._
 import loggerf.syntax._
 import org.http4s.client.Client
 
+import java.io.File
+import java.util.Base64
 import scala.concurrent.duration._
 
 /** @author Kevin Lee
@@ -325,20 +327,19 @@ object GitHubApi {
     client: Client[F],
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
     branch: Data.Branch,
-  )(implicit githubConfig: GithubConfig): F[Boolean] = (for {
-    github <- Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)).rightTF[F, GHError]
-    res    <- github
-                .repos
-                .listBranches(
-                  gitHubRepoWithAuth.gitHubRepo.org.org,
-                  gitHubRepoWithAuth.gitHubRepo.repo.repo,
-                  none,
-                  none,
-                  Map.empty,
-                )
-                .rightT[GHError]
-    result <- res.result.eitherT[F]
-  } yield result.exists(_.name.equalsIgnoreCase(branch.branch)))
-    .getOrElse(false)
+  )(implicit githubConfig: GithubConfig): F[Boolean] = {
+    import github4s.Decoders._
+    val httpClient =
+      new HttpClient[F](client, githubConfig, new StaticAccessToken(gitHubRepoWithAuth.accessToken.map(_.accessToken)))
+    (for {
+      branchResponse <-
+        httpClient
+          .get[Branch](
+            s"repos/${gitHubRepoWithAuth.gitHubRepo.org.org}/${gitHubRepoWithAuth.gitHubRepo.repo.repo}/branches/${branch.branch}",
+          )
+          .rightT[GHError]
+      result         <- branchResponse.result.eitherT[F]
+    } yield result.name === branch.branch).getOrElse(false)
+  }
 
 }
