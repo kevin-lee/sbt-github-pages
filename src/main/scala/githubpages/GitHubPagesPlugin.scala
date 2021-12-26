@@ -135,8 +135,8 @@ object GitHubPagesPlugin extends AutoPlugin {
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
-    gitHubPagesGitHubBaseUrl          := sys.env.getOrElse("GITHUB_ENT_BASE_URL", GitHubApiConfig.default.baseUrl.baseUrl),
-    gitHubPagesGitHubAuthorizeUrl     := sys
+    gitHubPagesGitHubBaseUrl      := sys.env.getOrElse("GITHUB_ENT_BASE_URL", GitHubApiConfig.default.baseUrl.baseUrl),
+    gitHubPagesGitHubAuthorizeUrl := sys
       .env
       .getOrElse("GITHUB_ENT_AUTHORIZE_URL", GitHubApiConfig.default.authorizeUrl.authorizeUrl),
     gitHubPagesGitHubAccessTokenUrl   := sys
@@ -284,9 +284,9 @@ object GitHubPagesPlugin extends AutoPlugin {
       val remote = List("git", "ls-remote", "--get-url", "origin").!!.trim()
       remote match {
         case GitHubHttps(user, repo) => (user, repo)
-        case GitHubGit(user, repo)   => (user, repo)
-        case GitHubSsh(user, repo)   => (user, repo)
-        case _                       => ("", "")
+        case GitHubGit(user, repo) => (user, repo)
+        case GitHubSsh(user, repo) => (user, repo)
+        case _ => ("", "")
       }
     } catch {
       case NonFatal(_) => ("", "")

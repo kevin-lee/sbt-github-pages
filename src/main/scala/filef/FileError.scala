@@ -6,10 +6,9 @@ import errors.StackTraceToString
 
 import scala.util.control.NonFatal
 
-/**
- * @author Kevin Lee
- * @since 2020-06-06
- */
+/** @author Kevin Lee
+  * @since 2020-06-06
+  */
 sealed trait FileError
 
 object FileError {
@@ -25,7 +24,6 @@ object FileError {
   final case class NotDirectory(file: File) extends FileError
 
   final case class NotInBaseDir(baseDir: File, file: File) extends FileError
-
 
   def fromNonFatal(throwable: Throwable): FileError = throwable match {
     case fileNotFoundException: FileNotFoundException =>

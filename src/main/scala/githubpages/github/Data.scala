@@ -8,10 +8,9 @@ import cats.syntax.all._
 import github4s.GithubConfig
 import github4s.domain.TreeResult
 
-/**
- * @author Kevin Lee
- * @since 2020-05-27
- */
+/** @author Kevin Lee
+  * @since 2020-05-27
+  */
 object Data {
 
   final case class GitHubApiConfig(
@@ -98,13 +97,10 @@ object Data {
 
   final case class BlobConfig(acceptedExtensions: Set[String], maxLength: Int)
 
-
   final case class IsText(blobConfig: BlobConfig) extends ((File, Array[Byte]) => Boolean) {
 
     override def apply(file: File, bytes: Array[Byte]): Boolean =
-      blobConfig.acceptedExtensions.exists(
-        extension => file.getName.toLowerCase.endsWith(extension)
-      ) &&
+      blobConfig.acceptedExtensions.exists(extension => file.getName.toLowerCase.endsWith(extension)) &&
         bytes.length < blobConfig.maxLength
 
     override lazy val toString: String =

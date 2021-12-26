@@ -8,10 +8,9 @@ import githubpages.github.Data.{Branch, GitHubPagesBranch, GitHubRepo}
 
 import scala.io.AnsiColor
 
-/**
- * @author Kevin Lee
- * @since 2020-06-01
- */
+/** @author Kevin Lee
+  * @since 2020-06-01
+  */
 sealed trait GitHubError
 
 object GitHubError {
@@ -34,7 +33,7 @@ object GitHubError {
   }
 
   final case class RequestFailure(ghError: GHError) extends GitHubError
-  object RequestFailure{
+  object RequestFailure {
     private[GitHubError] def apply(ghError: GHError): GitHubError =
       new RequestFailure(ghError)
   }
@@ -90,7 +89,9 @@ object GitHubError {
 
     case PagePublishBranchNotExist(gitHubRepo, branch) =>
       s"""
-         |GitHubError: The branch '${AnsiColor.GREEN}${branch.gitHubPagesBranch}${AnsiColor.RESET}' for publishing GitHub pages ${AnsiColor.GREEN}does not exist${AnsiColor.RESET} at ${gitHubRepo.org.org}/${gitHubRepo.repo.repo}.
+         |GitHubError: The branch '${AnsiColor.GREEN}${branch.gitHubPagesBranch}${AnsiColor.RESET}' for publishing GitHub pages ${AnsiColor.GREEN}does not exist${AnsiColor.RESET} at ${gitHubRepo
+        .org
+        .org}/${gitHubRepo.repo.repo}.
          |You need to create it before publishing the doc site.
          |To create it, please ${AnsiColor.BLUE}visit the following link${AnsiColor.RESET} and read sbt-github-pages document.
          |${AnsiColor.BLUE}https://sbt-github-pages.kevinly.dev/docs/run#create-gh-pages-branch${AnsiColor.RESET}
