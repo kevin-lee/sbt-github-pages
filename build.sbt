@@ -1,58 +1,74 @@
 import ProjectInfo._
 
-lazy val prepareDocusaurusBuild: TaskKey[Unit] = taskKey[Unit]("Task to do some preparation for docusaurus build.")
+ThisBuild / organization := props.Org
+ThisBuild / scalaVersion := props.ProjectScalaVersion
+ThisBuild / developers   := List(
+  Developer(
+    props.GitHubUsername,
+    "Kevin Lee",
+    "kevin.code@kevinlee.io",
+    url(s"https://github.com/${props.GitHubUsername}")
+  )
+)
+
+ThisBuild / homepage     := url(s"https://github.com/${props.GitHubUsername}/${props.ProjectName}").some
+
+ThisBuild / scmInfo   := ScmInfo(
+  url(s"https://github.com/${props.GitHubUsername}/${props.ProjectName}"),
+  s"git@github.com:${props.GitHubUsername}/${props.ProjectName}.git",
+).some
+
+ThisBuild / startYear := 2020.some
+
+ThisBuild / resolvers += "sonatype-snapshots" at s"https://${props.SonatypeCredentialHost}/content/repositories/snapshots"
+
+Global / sbtVersion := props.GlobalSbtVersion
 
 lazy val root = (project in file("."))
   .enablePlugins(SbtPlugin, DevOopsGitHubReleasePlugin, DocusaurPlugin)
   .settings(
-    organization := props.Org,
-    name := props.ProjectName,
-    scalaVersion := props.ProjectScalaVersion,
-    description := "sbt plugin to publish GitHub Pages",
-    developers := List(
-      Developer(props.GitHubUsername, "Kevin Lee", "kevin.code@kevinlee.io", url(s"https://github.com/${props.GitHubUsername}"))
-    ),
-    homepage := url(s"https://github.com/${props.GitHubUsername}/${props.ProjectName}").some,
-    scmInfo :=
-      ScmInfo(
-        url(s"https://github.com/${props.GitHubUsername}/${props.ProjectName}"),
-        s"git@github.com:${props.GitHubUsername}/${props.ProjectName}.git",
-      ).some,
-    startYear := 2020.some,
-    Global / sbtVersion := props.GlobalSbtVersion,
-    crossSbtVersions := props.CrossSbtVersions,
+    name                          := props.ProjectName,
+    description                   := "sbt plugin to publish GitHub Pages",
+    crossSbtVersions              := props.CrossSbtVersions,
     pluginCrossBuild / sbtVersion := props.GlobalSbtVersion,
-    Compile / console / scalacOptions := scalacOptions.value diff List("-Ywarn-unused-import", "-Xfatal-warnings"),
+    Compile / console / scalacOptions ~= (options => options diff List("-Ywarn-unused-import", "-Xfatal-warnings")),
     Compile / compile / wartremoverErrors ++= commonWarts,
     Test / compile / wartremoverErrors ++= commonWarts,
     libraryDependencies ++= libs.all,
     testFrameworks ++= Seq(TestFramework("hedgehog.sbt.Framework")),
+
     /* GitHub Release { */
     devOopsPackagedArtifacts := List.empty[String],
     /* } GitHub Release */
+
     /* Publish { */
     publishMavenStyle := true,
-    licenses := List("MIT" -> url("http://opensource.org/licenses/MIT")),
+    licenses          := List("MIT" -> url("http://opensource.org/licenses/MIT")),
     /* } Publish */
 
     /* Docs { */
-    docusaurDir := (ThisBuild / baseDirectory).value / "website",
+    docusaurDir      := (ThisBuild / baseDirectory).value / "website",
     docusaurBuildDir := docusaurDir.value / "build",
     /* } Docs */
 
   )
+  .settings(mavenCentralPublishSettings)
 
 lazy val props =
   new {
+
+    val SonatypeCredentialHost = "s01.oss.sonatype.org"
+    val SonatypeRepository     = s"https://$SonatypeCredentialHost/service/local"
+
     private val gitHubRepo = findRepoOrgAndName
 
     final val Org = "io.kevinlee"
 
-    final val ProjectScalaVersion     = "2.12.12"
+    final val ProjectScalaVersion       = "2.12.12"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
-    final val GitHubUsername         = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
-    final val ProjectName = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
+    final val GitHubUsername = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
+    final val ProjectName    = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
 
     final val GlobalSbtVersion = "1.2.8"
 
@@ -104,3 +120,10 @@ lazy val libs =
         loggerFSbtLogging,
       ) ++ hedgehogLibs
   }
+
+lazy val mavenCentralPublishSettings: SettingsDefinition = List(
+  /* Publish to Maven Central { */
+  sonatypeCredentialHost := props.SonatypeCredentialHost,
+  sonatypeRepository     := props.SonatypeRepository,
+  /* } Publish to Maven Central */
+)
