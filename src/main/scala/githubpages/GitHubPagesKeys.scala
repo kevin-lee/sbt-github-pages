@@ -6,10 +6,9 @@ import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.GitHubApi
 import sbt._
 
-/**
- * @author Kevin Lee
- * @since 2020-05-26
- */
+/** @author Kevin Lee
+  * @since 2020-05-26
+  */
 trait GitHubPagesKeys {
 
   val defaultDirNamesShouldBeIgnored: Set[String] = Set("target", "bin", "output")
@@ -37,7 +36,6 @@ trait GitHubPagesKeys {
       "The headers to add when sending a request to GitHub Enterprise API. No need to set if you're using github.com. " +
         s"(default: ${GitHubApiConfig.default.headers.headers})"
     )
-
 
   lazy val gitHubPagesBranch: SettingKey[String] =
     settingKey[String]("The GitHub Pages branch (default: gh-pages)")
@@ -69,9 +67,9 @@ trait GitHubPagesKeys {
 
   lazy val gitHubPagesDirsToIgnore: SettingKey[Set[String]] =
     settingKey[Set[String]](
-      s"A list of directory names to be ignored when committing to the GitHub Pages branch. (default: ${defaultDirNamesShouldBeIgnored.mkString("[", ",", "]")})"
+      s"A list of directory names to be ignored when committing to the GitHub Pages branch. (default: ${defaultDirNamesShouldBeIgnored
+        .mkString("[", ",", "]")})"
     )
-
 
   lazy val gitHubPagesIgnoreDotDirs: SettingKey[Boolean] =
     settingKey[Boolean](

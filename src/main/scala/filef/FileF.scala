@@ -14,10 +14,9 @@ import effectie.cats.{CanCatch, Fx}
 
 import scala.annotation.tailrec
 
-/**
- * @author Kevin Lee
- * @since 2020-05-27
- */
+/** @author Kevin Lee
+  * @since 2020-05-27
+  */
 object FileF {
 
   final case class BufferSize(bufferSize: Int) extends AnyVal
@@ -27,26 +26,27 @@ object FileF {
     file: File
   ): F[Either[FileError, String]] =
     (for {
-      base <- EitherT.liftF(pureOf(baseDir))
-      basePath <- if (base.isDirectory) EitherT {
-            val basePath = base.getCanonicalPath
-            pureOf(
-              if (basePath.endsWith(File.separator))
-                basePath.asRight[FileError]
-              else
-                s"$basePath${File.separator}".asRight[FileError]
-            )
-          } else
-            EitherT.leftT[F, String](FileError.notDirectory(base))
-      filePath <- EitherT(
-            catchNonFatalF(file.getCanonicalPath)(FileError.fromNonFatal)
-          )
+      base         <- EitherT.liftF(pureOf(baseDir))
+      basePath     <- if (base.isDirectory) EitherT {
+                        val basePath = base.getCanonicalPath
+                        pureOf(
+                          if (basePath.endsWith(File.separator))
+                            basePath.asRight[FileError]
+                          else
+                            s"$basePath${File.separator}".asRight[FileError]
+                        )
+                      }
+                      else
+                        EitherT.leftT[F, String](FileError.notDirectory(base))
+      filePath     <- EitherT(
+                        catchNonFatalF(file.getCanonicalPath)(FileError.fromNonFatal)
+                      )
       relativePath <- EitherT(
-            if (filePath.startsWith(basePath))
-              effectOf(filePath.substring(basePath.length).asRight[FileError])
-            else
-              pureOf(FileError.notInBaseDir(baseDir, file).asLeft[String])
-          )
+                        if (filePath.startsWith(basePath))
+                          effectOf(filePath.substring(basePath.length).asRight[FileError])
+                        else
+                          pureOf(FileError.notInBaseDir(baseDir, file).asLeft[String])
+                      )
     } yield relativePath).value
 
   def getAllFiles[F[_]: Fx: Monad](
@@ -61,7 +61,7 @@ object FileF {
     pureOf(dirs)
       .map(dirs =>
         (for {
-          dir <- dirs
+          dir  <- dirs
           file <- dir.listFiles(fl => fl.isFile && fileFilter(fl))
         } yield file).asRight[FileError]
       )
@@ -70,7 +70,7 @@ object FileF {
     rootDir: File,
     dirFilter: File => Boolean
   ): F[Either[FileError, Vector[File]]] = {
-    //TODO: improve it with proper error handling
+    // TODO: improve it with proper error handling
     @tailrec
     def getAllSubDirs(dirs: Vector[File], dirFilter: File => Boolean, acc: Vector[File]): Vector[File] =
       dirs match {
@@ -97,9 +97,9 @@ object FileF {
       bufferSize: Int,
       byteArrayConsumer: ByteArrayOutputStream
     ): Unit = {
-      val buffer = new Array[Byte](bufferSize)
+      val buffer     = new Array[Byte](bufferSize)
       val byteBuffer = ByteBuffer.wrap(buffer)
-      var bytesRead = fileChannel.read(byteBuffer)
+      var bytesRead  = fileChannel.read(byteBuffer)
       while (-1 != bytesRead) {
         byteArrayConsumer.write(buffer, 0, bytesRead)
         byteBuffer.clear()
@@ -107,19 +107,22 @@ object FileF {
       }
     }
 
-    val attempted = Resource.make(
+    val attempted = Resource
+      .make(
         effectOf(new FileInputStream(file))
-          .flatMap(fileInputStream =>
-            effectOf((fileInputStream, fileInputStream.getChannel()))
-          )
-      ) { case (fileInputStream, fileChannel) =>
-        effectOf(fileChannel.close()) *> effectOf(fileInputStream.close())
-      }.use { case (_, fileChannel) =>
-        for {
-          bytes <- pureOf(new ByteArrayOutputStream(bufferSize.bufferSize))
-          _ <- effectOf(readFile0(fileChannel, bufferSize.bufferSize, bytes))
-        } yield bytes.toByteArray
-      }.attempt
+          .flatMap(fileInputStream => effectOf((fileInputStream, fileInputStream.getChannel())))
+      ) {
+        case (fileInputStream, fileChannel) =>
+          effectOf(fileChannel.close()) *> effectOf(fileInputStream.close())
+      }
+      .use {
+        case (_, fileChannel) =>
+          for {
+            bytes <- pureOf(new ByteArrayOutputStream(bufferSize.bufferSize))
+            _     <- effectOf(readFile0(fileChannel, bufferSize.bufferSize, bytes))
+          } yield bytes.toByteArray
+      }
+      .attempt
 
     EitherT(attempted).leftMap(FileError.fromNonFatal).value
   }

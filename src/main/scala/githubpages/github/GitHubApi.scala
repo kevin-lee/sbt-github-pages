@@ -254,23 +254,23 @@ object GitHubApi {
       eitherTRight[GitHubError](commitSha)
     } else {
       for {
-        parentCommitSha       <-
+        parentCommitSha     <-
           commitSha.fold(
             fetchHeadCommit(github, commitInfo.gitHubRepo, commitInfo.branch, headers)
               .map(ref => Data.CommitSha(ref.`object`.sha))
           )(sha => eitherTRightPure[GitHubError](sha))
-        maybeBaseTreeCommit   <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
+        maybeBaseTreeCommit <- findBaseTreeCommit(github, commitInfo.gitHubRepo, commitSha, headers)
         maybeBaseTreeCommitSha = maybeBaseTreeCommit.map(_.tree.sha)
-        treeDataList          <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isText, headers)
-        treeResult            <- createTree(github, commitInfo.gitHubRepo, maybeBaseTreeCommitSha, treeDataList, headers)
-        refCommit             <- createCommit(
-                                   github,
-                                   commitInfo.gitHubRepo,
-                                   commitInfo.commitMessage,
-                                   Data.TreeResultSha.fromTreeResult(treeResult),
-                                   parentCommitSha,
-                                   headers,
-                                 )
+        treeDataList <- createTreeDataList(github, commitInfo.gitHubRepo, baseDir, allFiles.toList, isText, headers)
+        treeResult   <- createTree(github, commitInfo.gitHubRepo, maybeBaseTreeCommitSha, treeDataList, headers)
+        refCommit    <- createCommit(
+                          github,
+                          commitInfo.gitHubRepo,
+                          commitInfo.commitMessage,
+                          Data.TreeResultSha.fromTreeResult(treeResult),
+                          parentCommitSha,
+                          headers,
+                        )
       } yield Data.CommitSha(refCommit.sha).some
     }
 
@@ -285,7 +285,7 @@ object GitHubApi {
     isText: Data.IsText,
     headers: Map[String, String],
   )(implicit githubConfig: GithubConfig): F[Either[GitHubError, Option[Ref]]] = (for {
-    github    <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
+    github <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     commitInfo = Data.CommitInfo(gitHubRepoWithAuth.gitHubRepo, branch, commitMessage)
     allFiles  <-
       log(
