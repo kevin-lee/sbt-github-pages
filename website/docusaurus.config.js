@@ -22,7 +22,7 @@ const websiteConfig = {
     prism: {
       theme: require('prism-react-renderer/themes/nightOwl'),
       darkTheme: require('prism-react-renderer/themes/nightOwl'),
-      additionalLanguages: ['scala'],
+      additionalLanguages: ['java', 'scala'],
     },
     navbar: {
       title: 'sbt-github-pages',
