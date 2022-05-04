@@ -1,30 +1,22 @@
 package githubpages
 
 import cats.data.{EitherT, NonEmptyVector}
-import cats.effect.{ConcurrentEffect, ContextShift, IO, Timer, Sync => CatsSync}
+import cats.effect.{Concurrent, IO, Temporal}
 import cats.syntax.all._
-
 import effectie.cats.EitherTSupport._
 import effectie.cats.{CanCatch, Fx}
-
 import filef.FileF
-
 import github4s.domain.Ref
-
 import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.{Data, GitHubApi, GitHubError}
-
-import loggerf.logger._
 import loggerf.cats.{Log => LogF, _}
+import loggerf.logger._
 import loggerf.syntax._
-
+import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
-import org.http4s.client.blaze.BlazeClientBuilder
-
 import sbt.Keys.streams
 import sbt.{IO => SbtIo, _}
 
-import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
 /** @author Kevin Lee
@@ -50,7 +42,7 @@ object GitHubPagesPlugin extends AutoPlugin {
   ): B =
     aOrB.fold(a => throw new MessageOnlyException(aToString(a)), identity)
 
-  private def pushToGhPages[F[_]: Fx: CanCatch: CatsSync: ConcurrentEffect: Timer: LogF](
+  private def pushToGhPages[F[_]: Fx: CanCatch: Temporal: Concurrent: LogF](
     client: Client[F],
     gitHubApiConfig: GitHubApiConfig,
     gitHubRepo: Data.GitHubRepoWithAuth,
@@ -185,9 +177,7 @@ object GitHubPagesPlugin extends AutoPlugin {
         headers = GitHubApiConfig.Headers(gitHubPagesGitHubHeaders.value)
       )
 
-      implicit val ec: ExecutionContext = ExecutionContext.global
-      implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-      implicit val timer: Timer[IO]     = IO.timer(ec)
+      import cats.effect.unsafe.implicits.global
 
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 
@@ -206,7 +196,7 @@ object GitHubPagesPlugin extends AutoPlugin {
                                )
                              )
             result        <-
-              BlazeClientBuilder[IO](ec).resource.use { client =>
+              BlazeClientBuilder[IO].resource.use { client =>
                 (for {
                   gitHubRepo       <-
                     IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken))
