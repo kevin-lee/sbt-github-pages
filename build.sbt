@@ -83,8 +83,10 @@ lazy val props =
 
     final val http4sVersion = "0.23.11"
 
-    final val effectieVersion = "1.16.0"
-    final val loggerFVersion  = "1.16.0"
+    final val effectieVersion = "2.0.0-beta1"
+    final val loggerFVersion  = "2.0.0-beta1"
+
+    final val ExtrasVersion = "0.13.0"
   }
 
 lazy val libs =
@@ -104,8 +106,10 @@ lazy val libs =
     lazy val http4sClient = "org.http4s" %% "http4s-blaze-client" % props.http4sVersion
 
     lazy val effectie          = "io.kevinlee" %% "effectie-cats-effect3" % props.effectieVersion
-    lazy val loggerFCatsEffect = "io.kevinlee" %% "logger-f-cats-effect3" % props.loggerFVersion
+    lazy val loggerFCatsEffect = "io.kevinlee" %% "logger-f-cats" % props.loggerFVersion
     lazy val loggerFSbtLogging = "io.kevinlee" %% "logger-f-sbt-logging" % props.loggerFVersion
+
+    lazy val extrasCats = "io.kevinlee" %% "extras-cats" % props.ExtrasVersion
 
     lazy val all: List[ModuleID] =
       List(
@@ -118,6 +122,7 @@ lazy val libs =
         effectie,
         loggerFCatsEffect,
         loggerFSbtLogging,
+        extrasCats,
       ) ++ hedgehogLibs
   }
 
