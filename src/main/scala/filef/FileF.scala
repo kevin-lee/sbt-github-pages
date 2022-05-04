@@ -1,17 +1,15 @@
 package filef
 
-import java.io.{ByteArrayOutputStream, File, FileInputStream}
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
-
 import cats._
 import cats.data.EitherT
 import cats.effect._
 import cats.syntax.all._
-import effectie.cats.Effectful._
-import effectie.cats.Catching._
-import effectie.cats.{CanCatch, Fx}
+import effectie.core.Fx
+import effectie.syntax.all._
 
+import java.io.{ByteArrayOutputStream, File, FileInputStream}
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 import scala.annotation.tailrec
 
 /** @author Kevin Lee
@@ -22,7 +20,7 @@ object FileF {
 
   final case class BufferSize(bufferSize: Int) extends AnyVal
 
-  def relativePathOf[F[_]: Fx: CanCatch: Monad](
+  def relativePathOf[F[_]: Fx: Monad](
     baseDir: File,
     file: File
   ): F[Either[FileError, String]] =
@@ -40,7 +38,7 @@ object FileF {
                       else
                         EitherT.leftT[F, String](FileError.notDirectory(base))
       filePath     <- EitherT(
-                        catchNonFatalF(file.getCanonicalPath)(FileError.fromNonFatal)
+                        effectOf(file.getCanonicalPath).catchNonFatal(FileError.fromNonFatal)
                       )
       relativePath <- EitherT(
                         if (filePath.startsWith(basePath))

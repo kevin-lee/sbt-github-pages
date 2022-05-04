@@ -3,15 +3,16 @@ package githubpages
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{Concurrent, IO, Temporal}
 import cats.syntax.all._
-import effectie.cats.EitherTSupport._
-import effectie.cats.{CanCatch, Fx}
+import effectie.core.Fx
+import effectie.syntax.all._
+import extras.cats.syntax.either._
 import filef.FileF
 import github4s.domain.Ref
 import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.{Data, GitHubApi, GitHubError}
-import loggerf.cats.{Log => LogF, _}
+import loggerf.cats.syntax.all._
+import loggerf.core.{Log => LogF}
 import loggerf.logger._
-import loggerf.syntax._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
 import sbt.Keys.streams
@@ -42,7 +43,7 @@ object GitHubPagesPlugin extends AutoPlugin {
   ): B =
     aOrB.fold(a => throw new MessageOnlyException(aToString(a)), identity)
 
-  private def pushToGhPages[F[_]: Fx: CanCatch: Temporal: Concurrent: LogF](
+  private def pushToGhPages[F[_]: Fx: Temporal: Concurrent: LogF](
     client: Client[F],
     gitHubApiConfig: GitHubApiConfig,
     gitHubRepo: Data.GitHubRepoWithAuth,
@@ -63,33 +64,34 @@ object GitHubPagesPlugin extends AutoPlugin {
         GitHubError.nonFatalThrowable("Error fetching files recursively", err)
     }.flatMap {
       case Vector() =>
-        eitherTOfPure(
+        pureOf(
           GitHubError
             .messageOnly(
               s"No files to commit in the dir at ${siteDir.siteDir.getCanonicalPath}"
             )
             .asLeft[Option[Ref]]
-        )
+        ).eitherT
 
       case x +: xs =>
         for {
-          dirs <- eitherTRightPure(NonEmptyVector(x, xs))
-          _    <- log(
-                    EitherT(FileF.getAllFiles[F](dirs.toVector))
-                      .leftMap(
-                        GitHubError.fileHandling(
-                          s"getting all files in ${dirs.toVector.mkString("[", ",", "]")} to push to GitHub Pages"
-                        )
+          dirs <- pureOf(NonEmptyVector(x, xs)).rightT
+          _    <- FileF
+                    .getAllFiles[F](dirs.toVector)
+                    .eitherT
+                    .leftMap(
+                      GitHubError.fileHandling(
+                        s"getting all files in ${dirs.toVector.mkString("[", ",", "]")} to push to GitHub Pages"
                       )
-                  )(
-                    err => error(GitHubError.render(err)),
-                    files =>
-                      info(
-                        s"""The following allDirs will be pushed to '${gitHubPagesBranch.gitHubPagesBranch}' branch.
+                    )
+                    .log(
+                      err => error(GitHubError.render(err)),
+                      files =>
+                        info(
+                          s"""The following allDirs will be pushed to '${gitHubPagesBranch.gitHubPagesBranch}' branch.
                            |${files.mkString("  - ", "\n  - ", "")}
                            |""".stripMargin
-                      )
-                  )
+                        )
+                    )
 
           result <- EitherT(
                       GitHubApi.commitAndPush[F](
@@ -178,6 +180,8 @@ object GitHubPagesPlugin extends AutoPlugin {
       )
 
       import cats.effect.unsafe.implicits.global
+      import effectie.cats.fx.ioFx
+      import loggerf.cats.instances.logF
 
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 
