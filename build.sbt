@@ -74,17 +74,17 @@ lazy val props =
 
     val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-    final val hedgehogVersion = "0.7.0"
+    final val hedgehogVersion = "0.8.0"
 
-    final val catsVersion       = "2.6.1"
-    final val catsEffectVersion = "2.5.3"
-    final val github4sVersion   = "0.28.5"
+    final val catsVersion       = "2.7.0"
+    final val catsEffectVersion = "3.3.5"
+    final val github4sVersion   = "0.31.0"
     final val circeVersion      = "0.14.1"
 
-    final val http4sVersion = "0.21.27"
+    final val http4sVersion = "0.23.11"
 
-    final val effectieVersion = "1.15.0"
-    final val loggerFVersion  = "1.15.0"
+    final val effectieVersion = "1.16.0"
+    final val loggerFVersion  = "1.16.0"
   }
 
 lazy val libs =
@@ -103,8 +103,8 @@ lazy val libs =
     lazy val http4sDsl    = "org.http4s" %% "http4s-dsl"          % props.http4sVersion
     lazy val http4sClient = "org.http4s" %% "http4s-blaze-client" % props.http4sVersion
 
-    lazy val effectie          = "io.kevinlee" %% "effectie-cats-effect" % props.effectieVersion
-    lazy val loggerFCatsEffect = "io.kevinlee" %% "logger-f-cats-effect" % props.loggerFVersion
+    lazy val effectie          = "io.kevinlee" %% "effectie-cats-effect3" % props.effectieVersion
+    lazy val loggerFCatsEffect = "io.kevinlee" %% "logger-f-cats-effect3" % props.loggerFVersion
     lazy val loggerFSbtLogging = "io.kevinlee" %% "logger-f-sbt-logging" % props.loggerFVersion
 
     lazy val all: List[ModuleID] =

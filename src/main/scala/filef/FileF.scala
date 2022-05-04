@@ -18,6 +18,7 @@ import scala.annotation.tailrec
   * @since 2020-05-27
   */
 object FileF {
+  type MCancel[F[*]] = MonadCancelThrow[F]
 
   final case class BufferSize(bufferSize: Int) extends AnyVal
 
@@ -86,7 +87,7 @@ object FileF {
     effectOf(getAllSubDirs(Vector(rootDir), dirFilter, Vector.empty).asRight[FileError])
   }
 
-  def readBytesFromFile[F[_]: Fx: Monad: Sync](
+  def readBytesFromFile[F[_]: Fx: Monad: MCancel](
     file: File,
     bufferSize: BufferSize
   ): F[Either[FileError, Array[Byte]]] = {
