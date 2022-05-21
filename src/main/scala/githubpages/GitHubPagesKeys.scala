@@ -1,15 +1,18 @@
 package githubpages
 
-import java.io.File
-
 import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.GitHubApi
 import sbt._
+
+import java.io.File
+import scala.concurrent.duration.FiniteDuration
 
 /** @author Kevin Lee
   * @since 2020-05-26
   */
 trait GitHubPagesKeys {
+
+  implicit val durationInt: Int => scala.concurrent.duration.DurationInt = scala.concurrent.duration.DurationInt
 
   val defaultDirNamesShouldBeIgnored: Set[String] = Set("target", "bin", "output")
 
@@ -91,6 +94,14 @@ trait GitHubPagesKeys {
       "The commit message when publish to GitHub Pages. " +
         "First, it tries to get the value from the environment variable 'GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE'. " +
         s"""If not found, the default value is "Updated $${gitHubPagesBranch.value}""""
+    )
+
+  val DefaultGitHubPagesPublishRequestTimeout: FiniteDuration = org.http4s.client.defaults.RequestTimeout
+
+  lazy val gitHubPagesPublishRequestTimeout: SettingKey[FiniteDuration] =
+    settingKey[FiniteDuration](
+      "The reqeust timeout when publishing to GitHub Pages. " +
+        raw"""If not set, the default value is ${DefaultGitHubPagesPublishRequestTimeout.toString.replace(" ", ".")}"""
     )
 
   lazy val publishToGitHubPages: TaskKey[Unit] =
