@@ -150,6 +150,7 @@ object GitHubPagesPlugin extends AutoPlugin {
     gitHubPagesAcceptedTextMaxLength  := GitHubApi.defaultMaximumLength,
     gitHubPagesOrgName                := gitRemoteInfo._1,
     gitHubPagesRepoName               := gitRemoteInfo._2,
+    gitHubPagesPublishRequestTimeout  := DefaultGitHubPagesPublishRequestTimeout,
     publishToGitHubPages              := Def.taskDyn {
 
       val gitHubPagesPublishBranch = Data.GitHubPagesBranch(gitHubPagesBranch.value)
@@ -186,6 +187,7 @@ object GitHubPagesPlugin extends AutoPlugin {
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 
       if (gitHubToken.nonEmpty) {
+        val requestTimeout           = gitHubPagesPublishRequestTimeout.value
         @SuppressWarnings(Array("org.wartremover.warts.Throw"))
         val publishToGitHubPagesTask = Def.task {
           (for {
@@ -200,34 +202,41 @@ object GitHubPagesPlugin extends AutoPlugin {
                                )
                              )
             result        <-
-              BlazeClientBuilder[IO].resource.use { client =>
-                (for {
-                  gitHubRepo       <-
-                    IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken))
-                      .rightT[GitHubError]
-                  pageBranchExists <-
-                    GitHubApi
-                      .doesBranchExist[IO](client, gitHubRepo, Data.Branch(gitHubPagesPublishBranch.gitHubPagesBranch))
-                      .rightT[GitHubError]
+              BlazeClientBuilder[IO]
+                .withRequestTimeout(requestTimeout)
+                .resource
+                .use { client =>
+                  (for {
+                    gitHubRepo       <-
+                      IO.pure(Data.GitHubRepoWithAuth(Data.GitHubRepo(gitHubRepoOrg, gitHubRepoRepo), gitHubToken))
+                        .rightT[GitHubError]
+                    pageBranchExists <-
+                      GitHubApi
+                        .doesBranchExist[IO](
+                          client,
+                          gitHubRepo,
+                          Data.Branch(gitHubPagesPublishBranch.gitHubPagesBranch)
+                        )
+                        .rightT[GitHubError]
 
-                  _      <- if (pageBranchExists) IO.unit.rightT
-                            else
-                              IO(GitHubError.pagePublishBranchNotExist(gitHubRepo.gitHubRepo, gitHubPagesPublishBranch))
-                                .leftT[Unit]
-                  _      <- (if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit).rightT
-                  result <- pushToGhPages[IO](
-                              client,
-                              gitHubApiConfig,
-                              gitHubRepo,
-                              gitHubPagesPublishBranch,
-                              commitMessage,
-                              siteDir,
-                              dirFilter,
-                              GitHubApi.buildIsText(blobConfig),
-                              GitHubApi.essentialHeaders
-                            ).eitherT
-                } yield result).value
-              }
+                    _      <- if (pageBranchExists) IO.unit.rightT
+                              else
+                                IO(GitHubError.pagePublishBranchNotExist(gitHubRepo.gitHubRepo, gitHubPagesPublishBranch))
+                                  .leftT[Unit]
+                    _      <- (if (noJekyll) IO(SbtIo.touch(siteDir.siteDir / ".nojekyll")) else IO.unit).rightT
+                    result <- pushToGhPages[IO](
+                                client,
+                                gitHubApiConfig,
+                                gitHubRepo,
+                                gitHubPagesPublishBranch,
+                                commitMessage,
+                                siteDir,
+                                dirFilter,
+                                GitHubApi.buildIsText(blobConfig),
+                                GitHubApi.essentialHeaders
+                              ).eitherT
+                  } yield result).value
+                }
           } yield result).unsafeRunSync() match {
             case Right(Some(ref)) =>
               log.info(
