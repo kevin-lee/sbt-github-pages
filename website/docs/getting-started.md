@@ -18,7 +18,7 @@ sbt plugin to publish GitHub Pages with minimal effort.
 
 In the `project/plugins.sbt`, add the following line,
 ```sbt
-addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.8.1")
+addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.10.0")
 ```
 
 In your `build.sbt`,
