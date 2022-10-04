@@ -64,7 +64,7 @@ lazy val props =
 
     final val Org = "io.kevinlee"
 
-    final val ProjectScalaVersion       = "2.12.12"
+    final val ProjectScalaVersion       = "2.12.17"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
     final val GitHubUsername = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
@@ -76,17 +76,18 @@ lazy val props =
 
     final val hedgehogVersion = "0.9.0"
 
-    final val catsVersion       = "2.7.0"
-    final val catsEffectVersion = "3.3.12"
-    final val github4sVersion   = "0.31.0"
-    final val circeVersion      = "0.14.1"
+    final val catsVersion       = "2.8.0"
+    final val catsEffectVersion = "3.3.14"
+    final val github4sVersion   = "0.31.2"
+    final val circeVersion      = "0.14.3"
 
-    final val http4sVersion = "0.23.11"
+    final val http4sVersion            = "0.23.16"
+    final val http4sBlazeClientVersion = "0.23.12"
 
-    final val effectieVersion = "2.0.0-beta1"
-    final val loggerFVersion  = "2.0.0-beta1"
+    final val effectieVersion = "2.0.0-beta2"
+    final val loggerFVersion  = "2.0.0-beta2"
 
-    final val ExtrasVersion = "0.14.0"
+    final val ExtrasVersion = "0.20.0"
   }
 
 lazy val libs =
@@ -103,11 +104,11 @@ lazy val libs =
     lazy val circeParser = "io.circe"      %% "circe-parser" % props.circeVersion
 
     lazy val http4sDsl    = "org.http4s" %% "http4s-dsl"          % props.http4sVersion
-    lazy val http4sClient = "org.http4s" %% "http4s-blaze-client" % props.http4sVersion
+    lazy val http4sClient = "org.http4s" %% "http4s-blaze-client" % props.http4sBlazeClientVersion
 
     lazy val effectie          = "io.kevinlee" %% "effectie-cats-effect3" % props.effectieVersion
-    lazy val loggerFCatsEffect = "io.kevinlee" %% "logger-f-cats" % props.loggerFVersion
-    lazy val loggerFSbtLogging = "io.kevinlee" %% "logger-f-sbt-logging" % props.loggerFVersion
+    lazy val loggerFCatsEffect = "io.kevinlee" %% "logger-f-cats"         % props.loggerFVersion
+    lazy val loggerFSbtLogging = "io.kevinlee" %% "logger-f-sbt-logging"  % props.loggerFVersion
 
     lazy val extrasCats = "io.kevinlee" %% "extras-cats" % props.ExtrasVersion
 

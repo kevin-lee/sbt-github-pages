@@ -1,25 +1,26 @@
 package githubpages.github
 
-import cats._
+import cats.*
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{Concurrent, Temporal}
-import cats.syntax.all._
-import extras.cats.syntax.either._
+import cats.syntax.all.*
+import extras.cats.syntax.either.*
 import effectie.core.Fx
-import effectie.syntax.all._
+import effectie.syntax.all.*
 import filef.FileF
-import github4s.domain._
+import github4s.domain.*
 import github4s.http.HttpClient
 import github4s.interpreters.StaticAccessToken
 import github4s.{GHError, GHResponse, Github, GithubConfig}
 import githubpages.github.Data.{CommitInfo, GitHubApiConfig}
 import loggerf.core.Log
-import loggerf.cats.syntax.all._
+import loggerf.syntax.all.*
 import org.http4s.client.Client
 
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.Base64
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 /** @author Kevin Lee
   * @since 2020-05-27
@@ -157,7 +158,8 @@ object GitHubApi {
       headers: Map[String, String],
     ): EitherT[F, GitHubError, TreeData] =
       if (isText(file, bytes))
-        pureOf(TreeDataBlob(filePath, blobMode, blobType, new String(bytes)): TreeData).rightT[GitHubError]
+        pureOf(TreeDataBlob(filePath, blobMode, blobType, new String(bytes, StandardCharsets.UTF_8)): TreeData)
+          .rightT[GitHubError]
       else
         treeDataWithBase64Encoding(github, gitHubRepo, filePath, bytes, headers)
 

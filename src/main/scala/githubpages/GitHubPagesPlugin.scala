@@ -10,7 +10,7 @@ import filef.FileF
 import github4s.domain.Ref
 import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.{Data, GitHubApi, GitHubError}
-import loggerf.cats.syntax.all._
+import loggerf.syntax.all._
 import loggerf.core.{Log => LogF}
 import loggerf.logger._
 import org.http4s.blaze.client.BlazeClientBuilder
@@ -163,6 +163,7 @@ object GitHubPagesPlugin extends AutoPlugin {
       val commitMessage  = Data.CommitMessage(gitHubPagesPublishCommitMessage.value)
       val dirsToIgnore   = gitHubPagesDirsToIgnore.value
       val ignoreDotDirs  = gitHubPagesIgnoreDotDirs.value
+      @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
       val dirFilter      =
         if (ignoreDotDirs)
           (dir: File) => !(dirsToIgnore.contains(dir.getName.toLowerCase) || dir.getName.startsWith("."))
@@ -181,8 +182,8 @@ object GitHubPagesPlugin extends AutoPlugin {
       )
 
       import cats.effect.unsafe.implicits.global
-      import effectie.cats.fx.ioFx
-      import loggerf.cats.instances.logF
+      import effectie.ce3.fx.ioFx
+      import loggerf.instances.cats.logF
 
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 

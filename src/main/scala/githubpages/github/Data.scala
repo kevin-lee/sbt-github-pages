@@ -99,6 +99,7 @@ object Data {
 
   final case class IsText(blobConfig: BlobConfig) extends ((File, Array[Byte]) => Boolean) {
 
+    @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
     override def apply(file: File, bytes: Array[Byte]): Boolean =
       blobConfig.acceptedExtensions.exists(extension => file.getName.toLowerCase.endsWith(extension)) &&
         bytes.length < blobConfig.maxLength
