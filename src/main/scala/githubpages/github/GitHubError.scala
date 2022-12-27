@@ -1,11 +1,11 @@
 package githubpages.github
 
-import java.io.File
 import errors.StackTraceToString
 import filef.FileError
 import github4s.GHError
 import githubpages.github.Data.{Branch, GitHubPagesBranch, GitHubRepo}
 
+import java.io.File
 import scala.io.AnsiColor
 
 /** @author Kevin Lee
@@ -90,8 +90,8 @@ object GitHubError {
     case PagePublishBranchNotExist(gitHubRepo, branch) =>
       s"""
          |GitHubError: The branch '${AnsiColor.GREEN}${branch.gitHubPagesBranch}${AnsiColor.RESET}' for publishing GitHub pages ${AnsiColor.GREEN}does not exist${AnsiColor.RESET} at ${gitHubRepo
-        .org
-        .org}/${gitHubRepo.repo.repo}.
+          .org
+          .org}/${gitHubRepo.repo.repo}.
          |You need to create it before publishing the doc site.
          |To create it, please ${AnsiColor.BLUE}visit the following link${AnsiColor.RESET} and read sbt-github-pages document.
          |${AnsiColor.BLUE}https://sbt-github-pages.kevinly.dev/docs/run#create-gh-pages-branch${AnsiColor.RESET}

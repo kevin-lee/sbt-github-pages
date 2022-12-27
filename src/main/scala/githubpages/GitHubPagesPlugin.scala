@@ -2,21 +2,21 @@ package githubpages
 
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{Concurrent, IO, Temporal}
-import cats.syntax.all._
+import cats.syntax.all.*
 import effectie.core.Fx
-import effectie.syntax.all._
-import extras.cats.syntax.either._
+import effectie.syntax.all.*
+import extras.cats.syntax.either.*
 import filef.FileF
 import github4s.domain.Ref
 import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.{Data, GitHubApi, GitHubError}
-import loggerf.syntax.all._
-import loggerf.core.{Log => LogF}
-import loggerf.logger._
+import loggerf.core.Log as LogF
+import loggerf.logger.*
+import loggerf.syntax.all.*
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
 import sbt.Keys.streams
-import sbt.{IO => SbtIo, _}
+import sbt.{IO as SbtIo, *}
 
 import scala.util.control.NonFatal
 
@@ -29,7 +29,7 @@ object GitHubPagesPlugin extends AutoPlugin {
   override def trigger: PluginTrigger = noTrigger
 
   object autoImport extends GitHubPagesKeys
-  import autoImport._
+  import autoImport.*
 
   @SuppressWarnings(Array("org.wartremover.warts.Throw"))
   private def failWithMessage(message: String): Unit =
@@ -109,7 +109,7 @@ object GitHubPagesPlugin extends AutoPlugin {
     }.value
 
   private def decodeJsonToMapOfStringToString(message: String)(jsonString: String): Map[String, String] = {
-    import _root_.io.circe.parser._
+    import _root_.io.circe.parser.*
 
     def errorMessage[A](err: A) =
       s"""Invalid JSON $message
@@ -182,7 +182,7 @@ object GitHubPagesPlugin extends AutoPlugin {
       )
 
       import cats.effect.unsafe.implicits.global
-      import effectie.ce3.fx.ioFx
+      import effectie.instances.ce3.fx.ioFx
       import loggerf.instances.cats.logF
 
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
@@ -278,7 +278,7 @@ object GitHubPagesPlugin extends AutoPlugin {
 
   /** Gets the Github user and repository from the git remote info */
   private val gitRemoteInfo = {
-    import scala.sys.process._
+    import scala.sys.process.*
 
     val identifier  = """([^\/]+?)"""
     val GitHubHttps = s"https://github.com/$identifier/$identifier(?:\\.git)?".r

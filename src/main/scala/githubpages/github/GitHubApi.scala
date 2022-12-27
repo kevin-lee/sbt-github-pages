@@ -4,9 +4,9 @@ import cats.*
 import cats.data.{EitherT, NonEmptyVector}
 import cats.effect.{Concurrent, Temporal}
 import cats.syntax.all.*
-import extras.cats.syntax.either.*
 import effectie.core.Fx
 import effectie.syntax.all.*
+import extras.cats.syntax.either.*
 import filef.FileF
 import github4s.domain.*
 import github4s.http.HttpClient
@@ -326,7 +326,7 @@ object GitHubApi {
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
     branch: Data.Branch,
   )(implicit githubConfig: GithubConfig): F[Boolean] = {
-    import github4s.Decoders._
+    import github4s.Decoders.*
     val httpClient =
       new HttpClient[F](client, githubConfig, new StaticAccessToken(gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     (for {

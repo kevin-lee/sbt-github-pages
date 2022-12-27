@@ -2,7 +2,7 @@ package githubpages
 
 import githubpages.github.Data.GitHubApiConfig
 import githubpages.github.GitHubApi
-import sbt._
+import sbt.*
 
 import java.io.File
 import scala.concurrent.duration.FiniteDuration
@@ -71,7 +71,7 @@ trait GitHubPagesKeys {
   lazy val gitHubPagesDirsToIgnore: SettingKey[Set[String]] =
     settingKey[Set[String]](
       s"A list of directory names to be ignored when committing to the GitHub Pages branch. (default: ${defaultDirNamesShouldBeIgnored
-        .mkString("[", ",", "]")})"
+          .mkString("[", ",", "]")})"
     )
 
   lazy val gitHubPagesIgnoreDotDirs: SettingKey[Boolean] =
