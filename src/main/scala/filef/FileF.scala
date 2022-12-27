@@ -1,11 +1,11 @@
 package filef
 
-import cats._
+import cats.*
 import cats.data.EitherT
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import effectie.core.Fx
-import effectie.syntax.all._
+import effectie.syntax.all.*
 
 import java.io.{ByteArrayOutputStream, File, FileInputStream}
 import java.nio.ByteBuffer
