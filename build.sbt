@@ -70,24 +70,24 @@ lazy val props =
     final val GitHubUsername = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
     final val ProjectName    = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
 
-    final val GlobalSbtVersion = "1.2.8"
+    final val GlobalSbtVersion = "1.6.2"
 
     val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-    final val hedgehogVersion = "0.9.0"
+    final val hedgehogVersion = "0.10.1"
 
-    final val catsVersion       = "2.8.0"
-    final val catsEffectVersion = "3.3.14"
+    final val catsVersion       = "2.9.0"
+    final val catsEffectVersion = "3.4.3"
     final val github4sVersion   = "0.31.2"
     final val circeVersion      = "0.14.3"
 
     final val http4sVersion            = "0.23.16"
-    final val http4sBlazeClientVersion = "0.23.12"
+    final val http4sBlazeClientVersion = "0.23.13"
 
-    final val effectieVersion = "2.0.0-beta2"
-    final val loggerFVersion  = "2.0.0-beta2"
+    final val effectieVersion = "2.0.0-beta4"
+    final val loggerFVersion  = "2.0.0-beta4"
 
-    final val ExtrasVersion = "0.20.0"
+    final val ExtrasVersion = "0.26.0"
   }
 
 lazy val libs =

@@ -1,9 +1,8 @@
 package filef
 
-import java.io.{File, FileNotFoundException, IOException}
-
 import errors.StackTraceToString
 
+import java.io.{File, FileNotFoundException, IOException}
 import scala.util.control.NonFatal
 
 /** @author Kevin Lee
@@ -25,15 +24,15 @@ object FileError {
 
   final case class NotInBaseDir(baseDir: File, file: File) extends FileError
 
-  def fromNonFatal(throwable: Throwable): FileError = throwable match {
+  def fromNonFatal: PartialFunction[Throwable, FileError] = {
     case fileNotFoundException: FileNotFoundException =>
-      fileNotFound(fileNotFoundException)
+      FileError.fileNotFound(fileNotFoundException)
 
     case ioException: IOException =>
-      io(ioException)
+      FileError.io(ioException)
 
     case NonFatal(ex) =>
-      Unknown(ex)
+      FileError.unknown(ex)
   }
 
   def fileNotFound(

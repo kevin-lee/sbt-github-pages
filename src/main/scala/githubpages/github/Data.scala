@@ -1,12 +1,11 @@
 package githubpages.github
 
-import java.io.File
-
-import cats._
-import cats.syntax.all._
-
+import cats.*
+import cats.syntax.all.*
 import github4s.GithubConfig
 import github4s.domain.TreeResult
+
+import java.io.File
 
 /** @author Kevin Lee
   * @since 2020-05-27
