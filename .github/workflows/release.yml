@@ -15,7 +15,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: olafurpg/setup-scala@v14
         with:
           java-version: ${{ env.GH_JAVA_VERSION }}
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: olafurpg/setup-scala@v14
