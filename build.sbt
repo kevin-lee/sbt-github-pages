@@ -64,7 +64,7 @@ lazy val props =
 
     final val Org = "io.kevinlee"
 
-    final val ProjectScalaVersion       = "2.12.17"
+    final val ProjectScalaVersion       = "2.12.18"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
     final val GitHubUsername = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
@@ -76,18 +76,18 @@ lazy val props =
 
     final val hedgehogVersion = "0.10.1"
 
-    final val CatsVersion       = "2.9.0"
-    final val CatsEffectVersion = "3.4.3"
-    final val Github4sVersion   = "0.31.2"
-    final val CirceVersion      = "0.14.3"
+    final val CatsVersion       = "2.10.0"
+    final val CatsEffectVersion = "3.5.2"
+    final val Github4sVersion   = "0.32.1"
+    final val CirceVersion      = "0.14.6"
 
-    final val Http4sVersion            = "0.23.16"
-    final val Http4sBlazeClientVersion = "0.23.13"
+    final val Http4sVersion            = "0.23.24"
+    final val Http4sBlazeClientVersion = "0.23.15"
 
-    final val EffectieVersion = "2.0.0-beta4"
-    final val LoggerFVersion  = "2.0.0-beta4"
+    final val EffectieVersion = "2.0.0-beta13"
+    final val LoggerFVersion  = "2.0.0-beta22"
 
-    final val ExtrasVersion = "0.26.0"
+    final val ExtrasVersion = "0.44.0"
   }
 
 lazy val libs =

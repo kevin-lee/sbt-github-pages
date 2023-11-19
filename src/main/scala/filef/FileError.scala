@@ -12,13 +12,13 @@ sealed trait FileError
 
 object FileError {
 
-  final case class FileNotFound private (
+  final case class FileNotFound(
     fileNotFoundException: FileNotFoundException
   ) extends FileError
 
-  final case class Io private (ioException: IOException) extends FileError
+  final case class Io(ioException: IOException) extends FileError
 
-  final case class Unknown private (throwable: Throwable) extends FileError
+  final case class Unknown(throwable: Throwable) extends FileError
 
   final case class NotDirectory(file: File) extends FileError
 
