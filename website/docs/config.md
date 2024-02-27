@@ -255,6 +255,30 @@ gitHubPagesPublishCommitMessage :=
 e.g.) If you want to have a different message, you can change it.
 ```scala
 gitHubPagesPublishCommitMessage := s"New stuff in my awesome website!!!"
+
+
+### Publish Force Push
+| Name                           | Value Type | Default                                                                               |
+| ------------------------------ | ---------- | ------------------------------------------------------------------------------------- |
+| `gitHubPagesPublishForcePush`  | `Boolean`  | ENV VAR `GITHUB_PAGES_PUBLISH_FORCE_PUSH` or false |
+
+The commit message when publish to GitHub Pages. 
+
+First, it tries to get the value from the environment variable `GITHUB_PAGES_PUBLISH_FORCE_PUSH`. 
+If not found, the default value is false
+
+Default:
+```scala
+gitHubPagesPublishCommitMessage :=
+  sys.env.getOrElse(
+    "GITHUB_PAGES_PUBLISH_FORCE_PUSH",
+    false
+  )
+```
+
+e.g.) If you want to, you can enable force push.
+```scala
+gitHubPagesPublishForcePush := true
 ```
 
 ## Use GitHub Enterprise
