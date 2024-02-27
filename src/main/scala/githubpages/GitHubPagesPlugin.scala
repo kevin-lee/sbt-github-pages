@@ -52,7 +52,8 @@ object GitHubPagesPlugin extends AutoPlugin {
     siteDir: Data.SiteDir,
     dirFilter: File => Boolean,
     isText: Data.IsText,
-    headers: Map[String, String]
+    headers: Map[String, String],
+    forcePush: Boolean,
   ): F[Either[GitHubError, Option[Ref]]] =
     EitherT(
       FileF.getAllDirsRecursively(
@@ -102,7 +103,8 @@ object GitHubPagesPlugin extends AutoPlugin {
                         commitMessage,
                         dirs,
                         isText,
-                        headers
+                        headers,
+                        forcePush
                       )(gitHubApiConfig)
                     )
         } yield result
@@ -121,11 +123,15 @@ object GitHubPagesPlugin extends AutoPlugin {
     returnOrThrowMessageOnlyException(headers)(errorMessage)
   }
 
+  private lazy val forcePushStr = sys.env.getOrElse("GITHUB_PAGES_PUBLISH_FORCE_PUSH", "")
+
   override lazy val globalSettings: Seq[Def.Setting[_]] = Seq(
     gitHubPagesBranch               := "gh-pages",
     gitHubPagesNoJekyll             := true,
     gitHubPagesPublishCommitMessage :=
       sys.env.getOrElse("GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE", s"Updated ${gitHubPagesBranch.value}"),
+    gitHubPagesPublishForcePush     :=
+      forcePushStr == "1" || forcePushStr.equalsIgnoreCase("true")
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
@@ -163,6 +169,7 @@ object GitHubPagesPlugin extends AutoPlugin {
       val commitMessage  = Data.CommitMessage(gitHubPagesPublishCommitMessage.value)
       val dirsToIgnore   = gitHubPagesDirsToIgnore.value
       val ignoreDotDirs  = gitHubPagesIgnoreDotDirs.value
+      val forcePush      = gitHubPagesPublishForcePush.value
       @SuppressWarnings(Array("org.wartremover.warts.PlatformDefault"))
       val dirFilter      =
         if (ignoreDotDirs)
@@ -234,7 +241,8 @@ object GitHubPagesPlugin extends AutoPlugin {
                                 siteDir,
                                 dirFilter,
                                 GitHubApi.buildIsText(blobConfig),
-                                GitHubApi.essentialHeaders
+                                GitHubApi.essentialHeaders,
+                                forcePush
                               ).eitherT
                   } yield result).value
                 }

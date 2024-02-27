@@ -78,6 +78,7 @@ object GitHubApi {
     branch: Data.Branch,
     commitSha: Data.CommitSha,
     headers: Map[String, String],
+    force: Boolean,
   ): EitherT[F, GitHubError, Ref] =
     EitherT(
       processResponse(
@@ -88,7 +89,7 @@ object GitHubApi {
             gitHubRepo.repo.repo,
             s"heads/${branch.branch}",
             commitSha.commitSha,
-            force = false,
+            force = force,
             headers,
           )
       )
@@ -284,6 +285,7 @@ object GitHubApi {
     allDirs: NonEmptyVector[File],
     isText: Data.IsText,
     headers: Map[String, String],
+    forcePush: Boolean = false,
   )(implicit githubConfig: GithubConfig): F[Either[GitHubError, Option[Ref]]] = (for {
     github <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     commitInfo = Data.CommitInfo(gitHubRepoWithAuth.gitHubRepo, branch, commitMessage)
@@ -302,7 +304,7 @@ object GitHubApi {
                    )
     refCommit <- updateCommitFiles(github, commitInfo, baseDir, allFiles, isText, none[Data.CommitSha], headers)
     headRef   <-
-      refCommit.traverse(commitSha => updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers))
+      refCommit.traverse(commitSha => updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers, forcePush))
   } yield headRef).value
 
   @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
@@ -315,9 +317,10 @@ object GitHubApi {
     allDirs: NonEmptyVector[File],
     isText: Data.IsText,
     headers: Map[String, String],
+    forcePush: Boolean = false,
   )(gitHubApiConfig: GitHubApiConfig): F[Either[GitHubError, Option[Ref]]] = {
     implicit val githubConfig = GitHubApiConfig.toGithubConfig(gitHubApiConfig)
-    commitAndPush0(client, gitHubRepoWithAuth, branch, baseDir, commitMessage, allDirs, isText, headers)
+    commitAndPush0(client, gitHubRepoWithAuth, branch, baseDir, commitMessage, allDirs, isText, headers, forcePush)
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))

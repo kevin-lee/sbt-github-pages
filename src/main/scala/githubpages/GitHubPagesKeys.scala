@@ -96,6 +96,13 @@ trait GitHubPagesKeys {
         s"""If not found, the default value is "Updated $${gitHubPagesBranch.value}""""
     )
 
+  lazy val gitHubPagesPublishForcePush: SettingKey[Boolean] =
+    settingKey[Boolean](
+      "Whether to force push to the specified branch when publish to GitHub Pages. " +
+        "First, it tries to get the value from the environment variable 'GITHUB_PAGES_PUBLISH_FORCE_PUSH'. " +
+        "If not found, the default value is false"
+    )
+
   val DefaultGitHubPagesPublishRequestTimeout: FiniteDuration = org.http4s.client.defaults.RequestTimeout
 
   lazy val gitHubPagesPublishRequestTimeout: SettingKey[FiniteDuration] =
