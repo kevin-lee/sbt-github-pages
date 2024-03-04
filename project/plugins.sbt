@@ -8,3 +8,4 @@ val sbtDevOops = "3.0.0"
 addSbtPlugin("io.kevinlee" % "sbt-devoops-scala"     % sbtDevOops)
 addSbtPlugin("io.kevinlee" % "sbt-devoops-sbt-extra" % sbtDevOops)
 addSbtPlugin("io.kevinlee" % "sbt-devoops-github"    % sbtDevOops)
+addSbtPlugin("io.kevinlee" % "sbt-devoops-starter"    % sbtDevOops)
