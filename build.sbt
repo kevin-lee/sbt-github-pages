@@ -77,15 +77,15 @@ lazy val props =
     final val hedgehogVersion = "0.10.1"
 
     final val CatsVersion       = "2.10.0"
-    final val CatsEffectVersion = "3.5.2"
+    final val CatsEffectVersion = "3.5.3"
     final val Github4sVersion   = "0.32.1"
     final val CirceVersion      = "0.14.6"
 
-    final val Http4sVersion            = "0.23.24"
-    final val Http4sBlazeClientVersion = "0.23.15"
+    final val Http4sVersion            = "0.23.25"
+    final val Http4sBlazeClientVersion = "0.23.16"
 
-    final val EffectieVersion = "2.0.0-beta13"
-    final val LoggerFVersion  = "2.0.0-beta22"
+    final val EffectieVersion = "2.0.0-beta14"
+    final val LoggerFVersion  = "2.0.0-beta24"
 
     final val ExtrasVersion = "0.44.0"
   }
