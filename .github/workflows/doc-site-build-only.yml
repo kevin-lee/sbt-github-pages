@@ -15,7 +15,7 @@ jobs:
         scala:
           - { version: "2.13.10", binary-version: "2.13", java-version: "11", java-distribution: "temurin" }
         node:
-          - { version: "16.16.0" }
+          - { version: "18.13.0" }
 
     steps:
       - uses: actions/checkout@v4
@@ -40,12 +40,12 @@ jobs:
             ${{ runner.os }}-sbt-${{ matrix.scala.binary-version }}-
 
       - name: Cache npm
-        uses: actions/cache@v4
+        uses: actions/cache@v4.0.0
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ matrix.node.version }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-${{ matrix.node.version }}
 
       - name: Build website
         env:
