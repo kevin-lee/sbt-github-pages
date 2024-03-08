@@ -255,7 +255,7 @@ gitHubPagesPublishCommitMessage :=
 e.g.) If you want to have a different message, you can change it.
 ```scala
 gitHubPagesPublishCommitMessage := s"New stuff in my awesome website!!!"
-
+```
 
 ### Publish Force Push
 | Name                           | Value Type | Default                                                                               |
