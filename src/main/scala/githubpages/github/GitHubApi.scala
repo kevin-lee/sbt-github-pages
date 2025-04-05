@@ -8,10 +8,11 @@ import effectie.core.Fx
 import effectie.syntax.all.*
 import extras.cats.syntax.either.*
 import filef.FileF
+import github4s.algebras.GithubAPIs
 import github4s.domain.*
 import github4s.http.HttpClient
 import github4s.interpreters.StaticAccessToken
-import github4s.{GHError, GHResponse, Github, GithubConfig}
+import github4s.{GHError, GHResponse, GithubClient, GithubConfig}
 import githubpages.github.Data.{CommitInfo, GitHubApiConfig}
 import loggerf.core.Log
 import loggerf.syntax.all.*
@@ -45,11 +46,11 @@ object GitHubApi {
   /*
    * https://docs.github.com/en/rest/overview/resources-in-the-rest-api#abuse-rate-limits
    */
-  private def githubWithAbuseRateLimit[F[_]: Temporal](github: Github[F]): F[Github[F]] =
+  private def githubWithAbuseRateLimit[F[_]: Temporal](github: GithubAPIs[F]): F[GithubAPIs[F]] =
     Temporal[F].sleep(1.second).as(github)
 
   private def fetchHeadCommit[F[_]: Fx: Monad](
-    github: Github[F],
+    github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     branch: Data.Branch,
     headers: Map[String, String],
@@ -73,7 +74,7 @@ object GitHubApi {
     }
 
   private def updateHead[F[_]: Fx: Monad](
-    github: Github[F],
+    github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     branch: Data.Branch,
     commitSha: Data.CommitSha,
@@ -103,7 +104,7 @@ object GitHubApi {
     )
 
   private def findBaseTreeCommit[F[_]: Fx: Monad](
-    github: Github[F],
+    github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     commitSha: Option[Data.CommitSha],
     headers: Map[String, String],
@@ -117,7 +118,7 @@ object GitHubApi {
     )
 
   private def createTreeDataList[F[_]: Fx: Monad: Temporal](
-    github: Github[F],
+    github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     baseDir: Data.BaseDir,
     files: List[File],
@@ -126,7 +127,7 @@ object GitHubApi {
   ): EitherT[F, GitHubError, List[TreeData]] = {
 
     def treeDataWithBase64Encoding(
-      github: Github[F],
+      github: GithubAPIs[F],
       gitHubRepo: Data.GitHubRepo,
       filePath: String,
       bytes: Array[Byte],
@@ -150,7 +151,7 @@ object GitHubApi {
       } yield response
 
     def createTreeData(
-      github: Github[F],
+      github: GithubAPIs[F],
       gitHubRepo: Data.GitHubRepo,
       file: File,
       filePath: String,
@@ -165,7 +166,7 @@ object GitHubApi {
         treeDataWithBase64Encoding(github, gitHubRepo, filePath, bytes, headers)
 
     def processFile(
-      github: Github[F],
+      github: GithubAPIs[F],
       gitHubRepo: Data.GitHubRepo,
       baseDir: Data.BaseDir,
       file: File,
@@ -192,7 +193,7 @@ object GitHubApi {
   }
 
   private def createTree[F[_]: Fx: Temporal: Monad](
-    github: Github[F],
+    github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     baseTreeSha: Option[String],
     treeData: List[TreeData],
@@ -216,7 +217,7 @@ object GitHubApi {
     } yield response
 
   private def createCommit[F[_]: Fx: Monad: Temporal: Monad](
-    github: Github[F],
+    github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     commitMessage: Data.CommitMessage,
     treeResultSha: Data.TreeResultSha,
@@ -243,7 +244,7 @@ object GitHubApi {
     } yield response
 
   private def updateCommitFiles[F[_]: Fx: Monad: Log: Temporal](
-    github: Github[F],
+    github: GithubAPIs[F],
     commitInfo: CommitInfo,
     baseDir: Data.BaseDir,
     allFiles: Vector[File],
@@ -287,7 +288,7 @@ object GitHubApi {
     headers: Map[String, String],
     forcePush: Boolean = false,
   )(implicit githubConfig: GithubConfig): F[Either[GitHubError, Option[Ref]]] = (for {
-    github <- EitherT.rightT[F, GitHubError](Github[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
+    github <- EitherT.rightT[F, GitHubError](GithubClient[F](client, gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     commitInfo = Data.CommitInfo(gitHubRepoWithAuth.gitHubRepo, branch, commitMessage)
     allFiles  <- EitherT(FileF.getAllFiles(allDirs.toVector))
                    .leftMap(GitHubError.fileHandling("getting all files to update commit dir"))
@@ -333,7 +334,7 @@ object GitHubApi {
   )(implicit githubConfig: GithubConfig): F[Boolean] = {
     import github4s.Decoders.*
     val httpClient =
-      new HttpClient[F](client, githubConfig, new StaticAccessToken(gitHubRepoWithAuth.accessToken.map(_.accessToken)))
+      HttpClient[F](client, githubConfig, new StaticAccessToken[F](gitHubRepoWithAuth.accessToken.map(_.accessToken)))
     (for {
       branchResponse <-
         httpClient

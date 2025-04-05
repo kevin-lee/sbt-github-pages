@@ -74,18 +74,18 @@ lazy val props =
 
     val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-    final val hedgehogVersion = "0.10.1"
+    final val hedgehogVersion = "0.12.0"
 
-    final val CatsVersion       = "2.10.0"
-    final val CatsEffectVersion = "3.5.3"
-    final val Github4sVersion   = "0.32.1"
-    final val CirceVersion      = "0.14.6"
+    final val CatsVersion       = "2.13.0"
+    final val CatsEffectVersion = "3.5.7"
+    final val Github4sVersion   = "0.33.3"
+    final val CirceVersion      = "0.14.12"
 
-    final val Http4sVersion            = "0.23.25"
-    final val Http4sBlazeClientVersion = "0.23.16"
+    final val Http4sVersion            = "0.23.30"
+    final val Http4sBlazeClientVersion = "0.23.17"
 
-    final val EffectieVersion = "2.0.0-beta14"
-    final val LoggerFVersion  = "2.0.0-beta24"
+    final val EffectieVersion = "2.0.0"
+    final val LoggerFVersion  = "2.1.18"
 
     final val ExtrasVersion = "0.44.0"
   }
