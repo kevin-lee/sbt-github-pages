@@ -304,10 +304,9 @@ object GitHubApi {
                      },
                    )
     refCommit <- updateCommitFiles(github, commitInfo, baseDir, allFiles, isText, none[Data.CommitSha], headers)
-    headRef   <-
-      refCommit.traverse(commitSha =>
-        updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers, forcePush)
-      )
+    headRef   <- refCommit.traverse(commitSha =>
+                   updateHead(github, gitHubRepoWithAuth.gitHubRepo, branch, commitSha, headers, forcePush)
+                 )
   } yield headRef).value
 
   @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))

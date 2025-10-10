@@ -190,7 +190,6 @@ object GitHubPagesPlugin extends AutoPlugin {
 
       import cats.effect.unsafe.implicits.global
       import effectie.instances.ce3.fx.ioFx
-      import loggerf.instances.cats.logF
 
       implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
 
