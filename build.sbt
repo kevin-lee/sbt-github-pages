@@ -20,8 +20,6 @@ ThisBuild / scmInfo   := ScmInfo(
 
 ThisBuild / startYear := 2020.some
 
-ThisBuild / resolvers += "sonatype-snapshots" at s"https://${props.SonatypeCredentialHost}/content/repositories/snapshots"
-
 Global / sbtVersion := props.GlobalSbtVersion
 
 lazy val root = (project in file("."))
@@ -52,42 +50,38 @@ lazy val root = (project in file("."))
     /* } Docs */
 
   )
-  .settings(mavenCentralPublishSettings)
 
 lazy val props =
   new {
-
-    val SonatypeCredentialHost = "s01.oss.sonatype.org"
-    val SonatypeRepository     = s"https://$SonatypeCredentialHost/service/local"
 
     private val gitHubRepo = findRepoOrgAndName
 
     final val Org = "io.kevinlee"
 
-    final val ProjectScalaVersion       = "2.12.18"
+    final val ProjectScalaVersion       = "2.12.20"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
     final val GitHubUsername = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
     final val ProjectName    = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
 
-    final val GlobalSbtVersion = "1.6.2"
+    final val GlobalSbtVersion = "1.11.2"
 
     val CrossSbtVersions: Seq[String] = Seq(GlobalSbtVersion)
 
-    final val hedgehogVersion = "0.12.0"
+    final val hedgehogVersion = "0.13.0"
 
     final val CatsVersion       = "2.13.0"
-    final val CatsEffectVersion = "3.5.7"
+    final val CatsEffectVersion = "3.6.3"
     final val Github4sVersion   = "0.33.3"
-    final val CirceVersion      = "0.14.12"
+    final val CirceVersion      = "0.14.15"
 
-    final val Http4sVersion            = "0.23.30"
+    final val Http4sVersion            = "0.23.32"
     final val Http4sBlazeClientVersion = "0.23.17"
 
     final val EffectieVersion = "2.0.0"
-    final val LoggerFVersion  = "2.1.18"
+    final val LoggerFVersion  = "2.4.0"
 
-    final val ExtrasVersion = "0.44.0"
+    final val ExtrasVersion = "0.49.0"
   }
 
 lazy val libs =
@@ -126,10 +120,3 @@ lazy val libs =
         extrasCats,
       ) ++ hedgehogLibs
   }
-
-lazy val mavenCentralPublishSettings: SettingsDefinition = List(
-  /* Publish to Maven Central { */
-  sonatypeCredentialHost := props.SonatypeCredentialHost,
-  sonatypeRepository     := props.SonatypeRepository,
-  /* } Publish to Maven Central */
-)
