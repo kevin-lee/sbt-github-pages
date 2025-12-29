@@ -111,10 +111,18 @@ trait GitHubPagesKeys {
         raw"""If not set, the default value is ${DefaultGitHubPagesPublishRequestTimeout.toString.replace(" ", ".")}"""
     )
 
+  lazy val gitHubPagesUseGithubTokenForGitHubPagesBranchCreation: SettingKey[Boolean] =
+    settingKey[Boolean](
+      "Whether to use the GitHub token when creating the GitHub Pages branch. (default: `true`)" +
+        "If `true`, it tries to get the GitHub token from the environment variable `GITHUB_TOKEN`. " +
+        "When it's `true` and the environment variable `GITHUB_TOKEN` is not set, " +
+        "it fails to create the GitHub Pages branch (default: `gh-pages`)."
+    )
+
   lazy val gitHubPagesBranchExists: TaskKey[Boolean] =
     taskKey[Boolean]("A task to check whether the GitHub Pages branch (gitHubPagesBranch.value) exists or not")
 
-  lazy val gitHubPagesGetCurrentBranch: TaskKey[String] =
+  lazy val gitHubPagesGetCurrentBranch: TaskKey[String]                =
     taskKey[String](
       "A task to get the current branch from GitHub Actions then fallback to the branch with `git` command. " +
         s"It will be first `$${GITHUB_HEAD_REF:-$$GITHUB_REF_NAME}` then fallback to `git rev-parse --abbrev-ref HEAD`"
