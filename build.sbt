@@ -78,10 +78,10 @@ lazy val props =
     final val Http4sVersion            = "0.23.32"
     final val Http4sBlazeClientVersion = "0.23.17"
 
-    final val EffectieVersion = "2.0.0"
-    final val LoggerFVersion  = "2.4.0"
+    final val EffectieVersion = "2.3.0"
+    final val LoggerFVersion  = "2.8.1"
 
-    final val ExtrasVersion = "0.49.0"
+    final val ExtrasVersion = "0.50.1"
   }
 
 lazy val libs =
