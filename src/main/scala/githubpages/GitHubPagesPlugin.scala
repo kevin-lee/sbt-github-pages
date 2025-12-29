@@ -170,8 +170,12 @@ object GitHubPagesPlugin extends AutoPlugin {
         sys
           .env
           .get("GITHUB_HEAD_REF")
+          .map(_.trim)
+          .filter(_.nonEmpty)
           .orElse(sys.env.get("GITHUB_REF_NAME"))
-          .getOrElse("git rev-parse --abbrev-ref HEAD".!!.trim)
+          .map(_.trim)
+          .filter(_.nonEmpty)
+          .getOrElse(List("git", "rev-parse", "--abbrev-ref", "HEAD").!!.trim)
       currentBranch
     },
     gitHubPagesUseGithubTokenForGitHubPagesBranchCreation := true,
