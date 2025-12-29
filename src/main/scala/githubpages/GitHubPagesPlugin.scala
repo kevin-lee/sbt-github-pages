@@ -15,7 +15,7 @@ import loggerf.logger.*
 import loggerf.syntax.all.*
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
-import sbt.Keys.streams
+import sbt.Keys.{sLog, streams}
 import sbt.{IO as SbtIo, *}
 
 import scala.util.control.NonFatal
@@ -139,25 +139,119 @@ object GitHubPagesPlugin extends AutoPlugin {
     gitHubPagesGitHubAuthorizeUrl := sys
       .env
       .getOrElse("GITHUB_ENT_AUTHORIZE_URL", GitHubApiConfig.default.authorizeUrl.authorizeUrl),
-    gitHubPagesGitHubAccessTokenUrl   := sys
+    gitHubPagesGitHubAccessTokenUrl              := sys
       .env
       .getOrElse("GITHUB_ENT_ACCESS_TOKEN_URL", GitHubApiConfig.default.accessTokenUrl.accessTokenUrl),
-    gitHubPagesGitHubHeaders          :=
+    gitHubPagesGitHubHeaders                     :=
       sys
         .env
         .get("GITHUB_ENT_HEADERS")
         .fold(GitHubApiConfig.default.headers.headers)(
           decodeJsonToMapOfStringToString("for the environment variable 'GITHUB_ENT_HEADERS'")
         ),
-    gitHubPagesGitHubToken            := sys.env.get("GITHUB_TOKEN"),
-    gitHubPagesDirsToIgnore           := defaultDirNamesShouldBeIgnored,
-    gitHubPagesIgnoreDotDirs          := true,
-    gitHubPagesAcceptedTextExtensions := GitHubApi.defaultTextExtensions,
-    gitHubPagesAcceptedTextMaxLength  := GitHubApi.defaultMaximumLength,
-    gitHubPagesOrgName                := gitRemoteInfo._1,
-    gitHubPagesRepoName               := gitRemoteInfo._2,
-    gitHubPagesPublishRequestTimeout  := DefaultGitHubPagesPublishRequestTimeout,
-    publishToGitHubPages              := Def.taskDyn {
+    gitHubPagesGitHubToken                       := sys.env.get("GITHUB_TOKEN"),
+    gitHubPagesDirsToIgnore                      := defaultDirNamesShouldBeIgnored,
+    gitHubPagesIgnoreDotDirs                     := true,
+    gitHubPagesAcceptedTextExtensions            := GitHubApi.defaultTextExtensions,
+    gitHubPagesAcceptedTextMaxLength             := GitHubApi.defaultMaximumLength,
+    gitHubPagesOrgName                           := gitRemoteInfo._1,
+    gitHubPagesRepoName                          := gitRemoteInfo._2,
+    gitHubPagesPublishRequestTimeout             := DefaultGitHubPagesPublishRequestTimeout,
+    gitHubPagesBranchExists                      := {
+      val gitHubPagesBranchValue     = gitHubPagesBranch.value
+      import sys.process.*
+      val doesGitHubPagesBranchExist =
+        s"git ls-remote --exit-code --heads origin $gitHubPagesBranchValue >/dev/null 2>&1;".! === 0
+      doesGitHubPagesBranchExist
+    },
+    gitHubPagesGetCurrentBranch                  := {
+      import sys.process.*
+      val currentBranch =
+        sys
+          .env
+          .get("GITHUB_HEAD_REF")
+          .orElse(sys.env.get("GITHUB_REF_NAME"))
+          .getOrElse("git rev-parse --abbrev-ref HEAD".!!.trim)
+      currentBranch
+    },
+    gitHubPagesCreateGitHubPagesBranchIfNotExist := {
+      val logger        = sLog.value
+      val ghPagesBranch = gitHubPagesBranch.value
+      val currentBranch = gitHubPagesGetCurrentBranch.value
+
+      if (gitHubPagesBranchExists.value) {
+        logger.info(s">> The GitHub Pages branch (`$ghPagesBranch`) already exists so ignore creating it")
+      } else {
+
+        if (sys.env.get("GITHUB_TOKEN").map(_.trim).exists(_.nonEmpty)) {
+          logger.info(">> ✅ The required GITHUB_TOKEN environment variable is set.")
+        } else {
+          val errorMessage =
+            raw""">> ❌ The required GITHUB_TOKEN environment variable is not set. Please set it.
+                 |e.g.)
+                 |      - name: Publish to GitHub Pages
+                 |        env:
+                 |          GITHUB_TOKEN: $${{ secrets.GITHUB_TOKEN }}
+                 |""".stripMargin
+
+          failWithMessage(errorMessage)
+        }
+
+        logger.info(s">> Current branch=$currentBranch")
+
+        import sys.process.*
+
+        // echo ">> Setting up git user"
+        val setGitUserNameCmd = """git config user.name "github-actions[bot]""""
+        logger.info(s">> Running: $setGitUserNameCmd")
+        logger.info(setGitUserNameCmd.!!)
+
+        val setGitUserEmailCmd = """git config user.email "github-actions[bot]@users.noreply.github.com""""
+        logger.info(s">> Running: $setGitUserEmailCmd")
+        logger.info(setGitUserEmailCmd.!!)
+
+        // echo ">> Running: `git checkout --orphan gh-pages`"
+        // git checkout --orphan gh-pages
+        val gitCheckoutOrphanCmd = s"git checkout --orphan $ghPagesBranch"
+        logger.info(s">> Running: $gitCheckoutOrphanCmd")
+        logger.info(gitCheckoutOrphanCmd.!!)
+
+        // echo ">> Running: rm -rf ."
+        // git rm -rf .
+        val gitRmRfDotCmd = "git rm -rf ."
+        logger.info(s">> Running: $gitRmRfDotCmd")
+        logger.info(gitRmRfDotCmd.!!)
+
+        // echo '>> Running: git commit --allow-empty -m "Add gh-pages branch"'
+        // git commit --allow-empty -m "Add gh-pages branch"
+        val gitCommitAllowEmptyCmd = s"""git commit --allow-empty -m "Add $ghPagesBranch branch""""
+        logger.info(s">> Running: $gitCommitAllowEmptyCmd")
+        logger.info(gitCommitAllowEmptyCmd.!!)
+
+        // echo ">> Running: gh auth setup-git"
+        // gh auth setup-git
+        val ghAuthSetupGitCmd = "gh auth setup-git"
+        logger.info(s">> Running: $ghAuthSetupGitCmd")
+        logger.info(ghAuthSetupGitCmd.!!)
+
+        // echo ">> Running: git push origin gh-pages"
+        // git push origin gh-pages
+
+        val gitPushOriginCmd = s"git push origin $ghPagesBranch"
+        logger.info(s">> Running: $gitPushOriginCmd")
+        logger.info(gitPushOriginCmd.!!)
+
+        // echo ">> Switching back to $current_branch"
+        // git checkout "$current_branch"
+        val gitCheckoutCurrentBranchCmd = s"""git checkout "$currentBranch""""
+        logger.info(s">> Running: $gitCheckoutCurrentBranchCmd")
+        logger.info(gitCheckoutCurrentBranchCmd.!!)
+      }
+
+    },
+    publishToGitHubPages := Def.taskDyn {
+
+      gitHubPagesCreateGitHubPagesBranchIfNotExist.value
 
       val gitHubPagesPublishBranch = Data.GitHubPagesBranch(gitHubPagesBranch.value)
 

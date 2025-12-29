@@ -111,6 +111,19 @@ trait GitHubPagesKeys {
         raw"""If not set, the default value is ${DefaultGitHubPagesPublishRequestTimeout.toString.replace(" ", ".")}"""
     )
 
+  lazy val gitHubPagesBranchExists: TaskKey[Boolean] =
+    taskKey[Boolean]("A task to check whether the GitHub Pages branch (gitHubPagesBranch.value) exists or not")
+
+  lazy val gitHubPagesGetCurrentBranch: TaskKey[String] =
+    taskKey[String](
+      "A task to get the current branch from GitHub Actions then fallback to the branch with `git` command. " +
+        s"It will be first `$${GITHUB_HEAD_REF:-$$GITHUB_REF_NAME}` then fallback to `git rev-parse --abbrev-ref HEAD`"
+    )
+  lazy val gitHubPagesCreateGitHubPagesBranchIfNotExist: TaskKey[Unit] =
+    taskKey[Unit](
+      "A task to create the GitHub Pages branch if it doesn't exist"
+    )
+
   lazy val publishToGitHubPages: TaskKey[Unit] =
     taskKey[Unit](
       "Task to push the files specified at gitHubPagesSiteDir to the branch specified at gitHubPagesBranch."
