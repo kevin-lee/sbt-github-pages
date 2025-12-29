@@ -259,9 +259,6 @@ object GitHubPagesPlugin extends AutoPlugin {
 
     },
     publishToGitHubPages := Def.taskDyn {
-
-      gitHubPagesCreateGitHubPagesBranchIfNotExist.value
-
       val gitHubPagesPublishBranch = Data.GitHubPagesBranch(gitHubPagesBranch.value)
 
       val siteDir        = Data.SiteDir(gitHubPagesSiteDir.value)
