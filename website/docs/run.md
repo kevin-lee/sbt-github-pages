@@ -18,13 +18,15 @@ to make sure the `gh-pages` branch exists. If the `gh-pages` branch doesn't exis
 it will create the `gh-pages` branch.
 :::
 
+### Create gh-pages branch
+
 <details>
   <summary>Legacy: Manual <code>gh-pages</code> branch creation (not recommended)</summary>
 
 :::warning NOTE
 It is no longer required as `gitHubPagesCreateGitHubPagesBranchIfNotExist` task will handle it automatically.
 :::
-### Create gh-pages branch
+
 You need to do it only once. If your project repo already has the `gh-pages` branch, skip it.
 
 ```bash
@@ -47,6 +49,52 @@ $ git push origin gh-pages
 ```
 
 </details>
+
+In GitHub Actions, creating `gh-pages` would be as easy as running `gitHubPagesCreateGitHubPagesBranchIfNotExist` task.
+
+e.g.)
+
+When the `gh-pages` branch is already there, 
+```bash
+sbt gitHubPagesCreateGitHubPagesBranchIfNotExist
+```
+```
+[info] >> The GitHub Pages branch (`gh-pages`) already exists so ignore creating it
+```
+
+When the `gh-pages` branch is missing,
+```bash
+sbt gitHubPagesCreateGitHubPagesBranchIfNotExist
+```
+```sbtshell
+[info] >> ✅ The required GITHUB_TOKEN environment variable is set.
+[info] >> Current branch=your-current-branch-name
+[info] >> Running: git config user.name "github-actions[bot]"
+[info] >> Running: git config user.email "github-actions[bot]@users.noreply.github.com"
+[info] >> Running: git checkout --orphan gh-pages
+Switched to a new branch 'gh-pages'
+[info] >> Running: git rm -rf .
+[info] rm '.github/dependabot.yml'
+[info] rm '.github/pr-labeler.yml'
+[info] rm '.github/workflows/build.yml'
+[info] rm '.github/workflows/doc-site-publish.yml'
+[info] rm '.gitignore'
+[info] rm 'LICENSE'
+[info] rm 'README.md'
+[info] >> Running: git commit --allow-empty -m Add gh-pages branch
+[info] [gh-pages (root-commit) f947f53] Add gh-pages branch
+[info] >> Running: gh auth setup-git
+[info] >> Running: git push origin gh-pages
+remote: 
+remote: Create a pull request for 'gh-pages' on GitHub by visiting:        
+remote:      https://github.com/your_username/your-project/pull/new/gh-pages        
+remote: 
+To https://github.com/your_username/your-project
+ * [new branch]      gh-pages -> gh-pages
+[info] >> Running: git checkout your-current-branch-name
+Switched to branch 'your-current-branch-name'
+```
+
 
 ### Publish GitHub Pages
 
