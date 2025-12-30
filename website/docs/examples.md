@@ -23,7 +23,7 @@ Root ─┬─ project
 In the `project/plugins.sbt`
 
 ```sbt
-addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.15.0")
+addSbtPlugin("io.kevinlee" % "sbt-github-pages" % "0.18.1")
 ```
 
 
@@ -45,9 +45,9 @@ lazy val root = (project in file("."))
 ### GitHub Actions
 In your GitHub Actions config file,
 
-e.g.) `.github/workflows/publish-github-pages.yml`
+e.g.)
 
-```yaml
+```yaml title=".github/workflows/publish-github-pages.yml"
 name: Publish GitHub Pages
 
 on:
@@ -62,41 +62,38 @@ jobs:
     strategy:
       matrix:
         scala:
-          - { binary-version: "2.12", java-version: "adopt@1.11" }
+          - { java-version: "21", java-distribution: "temurin" }
+        node:
+          - { version: "24.12.0" }
 
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: olafurpg/setup-scala@v10
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.scala.java-version }}
-      - uses: actions/setup-node@v2.1.5
+          distribution: ${{ matrix.scala.java-distribution }}
+          cache: 'sbt'
+      - uses: sbt/setup-sbt@v1
+      - uses: actions/setup-node@v6
         with:
-          node-version: '14.4.0'
+          node-version: ${{ matrix.node.version }}
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Cache SBT
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.cache/coursier
-            ~/.sbt
-          key: ${{ runner.os }}-sbt-${{ matrix.scala.binary-version }}-${{ hashFiles('**/*.sbt') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-${{ matrix.scala.binary-version }}-
-
       - name: Cache npm
-        uses: actions/cache@v2
+        uses: actions/cache@v5
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ matrix.node.version }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node-${{ matrix.node.version }}
 
       - name: Build and publish website using Docusaurus
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "> Create gh-pages branch if not exist"
+          sbt gitHubPagesCreateGitHubPagesBranchIfNotExist
+          
           cd website
           echo "> Install packages"
           npm install
@@ -104,6 +101,7 @@ jobs:
           rm -Rf build
           npm run build
           cd ..
+          
           echo "> Publish to GitHub Pages"
           sbt publishToGitHubPages
 

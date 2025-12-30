@@ -47,6 +47,7 @@ jobs:
           GA_ANONYMIZE_IP: ${{ secrets.GA_ANONYMIZE_IP }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          rm website/package-lock.json
           sbt \
             gitHubPagesCreateGitHubPagesBranchIfNotExist \
             clean \

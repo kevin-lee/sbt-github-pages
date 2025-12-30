@@ -6,14 +6,24 @@ sidebar_label: Run to Publish
 
 ## Publish GitHub Pages
 
-:::important
 
-Before publish, make sure your project repo has the `gh-pages` branch.
-If it does not exist, create it first. Creating the `gh-pages` branch
- might be added to `sbt-github-pages` in the future, but it is not available at the moment.
+:::warning IMPORTANT!
 
+Make sure to run
+```
+gitHubPagesCreateGitHubPagesBranchIfNotExist
+```
+before any publish task
+to make sure the `gh-pages` branch exists. If the `gh-pages` branch doesn't exist,
+it will create the `gh-pages` branch.
 :::
 
+<details>
+  <summary>Legacy: Manual <code>gh-pages</code> branch creation (not recommended)</summary>
+
+:::warning NOTE
+It is no longer required as `gitHubPagesCreateGitHubPagesBranchIfNotExist` task will handle it automatically.
+:::
 ### Create gh-pages branch
 You need to do it only once. If your project repo already has the `gh-pages` branch, skip it.
 
@@ -35,6 +45,8 @@ $ git push origin gh-pages
 
 # Now you can remove this project in the temporary location.
 ```
+
+</details>
 
 ### Publish GitHub Pages
 
@@ -70,3 +82,9 @@ sbt:test-project> publishToGitHubPages
 [info]   - /path/to/test-project/website/build/docs/config/index.html
 [success] Total time: 7 s, completed 20 Jun. 2020, 11:34:18 pm
 ```
+
+:::info
+Please check out [this example GitHub Actions](/docs/examples)
+to learn how to use it with GitHub Actions.
+:::
+
