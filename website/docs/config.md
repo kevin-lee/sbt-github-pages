@@ -31,7 +31,9 @@ lazy val root = (project in file("."))
 ### GitHub Org Name / Username *
 
 :::important
-This key must be set by the user of this plugin.
+If this is not set, it will be inferred from the `git remote` information.
+
+So it's a mandatory setting, but no manual setting is required if your git repo has the remote set up.
 :::
 
 | Name                 | Value Type | Default                                  |
@@ -44,14 +46,16 @@ Most of the times you won't need to set this setting, since `sbt-github-pages` w
 
 e.g.)
 ```scala
-gitHubPagesOrgName := "Kevin-Lee"
+gitHubPagesOrgName := "kevin-lee"
 ```
 
 
 ### GitHub Repo Name *
 
 :::important
-This key must be set by the user of this plugin.
+If this is not set, it will be inferred from the `git remote` information.
+
+So it's a mandatory setting, but no manual setting is required if your git repo has the remote set up. 
 :::
 
 | Name                  | Value Type | Default                                  |

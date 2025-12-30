@@ -36,9 +36,7 @@ lazy val root = (project in file("."))
   .enablePlugins(GitHubPagesPlugin)
   .settings(
     name := "YOUR_PROJECT",
-    gitHubPagesOrgName := "USERNAME_OR_ORG",
-    gitHubPagesRepoName := "YOUR_PROJECT",
-    gitHubPagesSiteDir := baseDirectory.value / "path/to/github-pages-root"
+    gitHubPagesSiteDir := baseDirectory.value / "website"
   )
 ```
 
