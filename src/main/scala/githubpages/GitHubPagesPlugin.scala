@@ -186,9 +186,25 @@ object GitHubPagesPlugin extends AutoPlugin {
 
       val useGhToken = gitHubPagesUseGithubTokenForGitHubPagesBranchCreation.value
 
+      val orgName = gitHubPagesOrgName.value
+      val repoName = gitHubPagesRepoName.value
+
       if (gitHubPagesBranchExists.value) {
         logger.info(s">> The GitHub Pages branch (`$ghPagesBranch`) already exists so ignore creating it")
       } else {
+
+        logger.info(
+          s""">> The GitHub Pages branch (`$ghPagesBranch`) does not exist so create it.
+             |>> ------------------------------------------------------------------------------
+             |>> NOTE: If it fails with permission error, please follow the instructions below:
+             |     - visit https://github.com/$orgName/$repoName/settings/actions
+             |     - From `Workflow permissions` section,
+             |       1. Section `Read and write permissions`
+             |       2. Check `Allow GitHub Actions to create and approve pull requests`
+             |       3. Save
+             |>> ------------------------------------------------------------------------------
+             |""".stripMargin
+        )
 
         if (useGhToken) {
           if (sys.env.get("GITHUB_TOKEN").map(_.trim).exists(_.nonEmpty)) {
@@ -200,6 +216,13 @@ object GitHubPagesPlugin extends AutoPlugin {
                    |      - name: Publish to GitHub Pages
                    |        env:
                    |          GITHUB_TOKEN: $${{ secrets.GITHUB_TOKEN }}
+                   |
+                   |---
+                   |Or if you're running it locally and your `gh` (GitHub CLI) is already authenticated,
+                   |set `gitHubPagesUseGithubTokenForGitHubPagesBranchCreation` to `false` so it will not use `GITHUB_TOKEN`.
+                   |
+                   |e.g.)
+                   |      gitHubPagesUseGithubTokenForGitHubPagesBranchCreation := false
                    |""".stripMargin
 
             failWithMessage(errorMessage)
@@ -257,8 +280,17 @@ object GitHubPagesPlugin extends AutoPlugin {
         // echo ">> Switching back to $current_branch"
         // git checkout "$current_branch"
         val gitCheckoutCurrentBranchCmd = List("git", "checkout", currentBranch)
-        logger.info(s">> Running: ${gitCheckoutCurrentBranchCmd.mkString(" ")}")
+        logger.info(s">> Running: `${gitCheckoutCurrentBranchCmd.mkString(" ")}` to switched back to $currentBranch")
         logger.info(gitCheckoutCurrentBranchCmd.!!)
+
+        logger.info(
+          s""">> ---------------------------------------------------------------
+             |   Now, please make sure to set up github pages
+             |     - Visit https://github.com/$orgName/$repoName/settings/pages
+             |     - Choose $ghPagesBranch from the `Branch` dropdown
+             |>> ---------------------------------------------------------------
+             |""".stripMargin
+        )
       }
 
     },
