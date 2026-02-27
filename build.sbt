@@ -61,7 +61,7 @@ lazy val props =
     final val ProjectScalaVersion       = "2.12.20"
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion)
 
-    final val GitHubUsername = gitHubRepo.fold("Kevin-Lee")(_.orgToString)
+    final val GitHubUsername = gitHubRepo.fold("kevin-lee")(_.orgToString)
     final val ProjectName    = gitHubRepo.fold("sbt-github-pages")(_.nameToString)
 
     final val GlobalSbtVersion = "1.11.2"
