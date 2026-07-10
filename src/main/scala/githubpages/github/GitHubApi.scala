@@ -216,7 +216,7 @@ object GitHubApi {
                              )
     } yield response
 
-  private def createCommit[F[_]: Fx: Monad: Temporal: Monad](
+  private def createCommit[F[_]: Fx: Monad: Temporal](
     github: GithubAPIs[F],
     gitHubRepo: Data.GitHubRepo,
     commitMessage: Data.CommitMessage,
@@ -309,7 +309,6 @@ object GitHubApi {
                  )
   } yield headRef).value
 
-  @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
   def commitAndPush[F[_]: Fx: Monad: Log: Temporal: Concurrent](
     client: Client[F],
     gitHubRepoWithAuth: Data.GitHubRepoWithAuth,
@@ -321,7 +320,7 @@ object GitHubApi {
     headers: Map[String, String],
     forcePush: Boolean = false,
   )(gitHubApiConfig: GitHubApiConfig): F[Either[GitHubError, Option[Ref]]] = {
-    implicit val githubConfig = GitHubApiConfig.toGithubConfig(gitHubApiConfig)
+    implicit val githubConfig: GithubConfig = GitHubApiConfig.toGithubConfig(gitHubApiConfig)
     commitAndPush0(client, gitHubRepoWithAuth, branch, baseDir, commitMessage, allDirs, isText, headers, forcePush)
   }
 

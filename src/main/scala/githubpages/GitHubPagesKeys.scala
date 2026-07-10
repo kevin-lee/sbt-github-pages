@@ -10,9 +10,7 @@ import scala.concurrent.duration.FiniteDuration
 /** @author Kevin Lee
   * @since 2020-05-26
   */
-trait GitHubPagesKeys {
-
-  implicit val durationInt: Int => scala.concurrent.duration.DurationInt = scala.concurrent.duration.DurationInt
+trait GitHubPagesKeys extends GitHubPagesKeysCompat {
 
   val defaultDirNamesShouldBeIgnored: Set[String] = Set("target", "bin", "output")
 
