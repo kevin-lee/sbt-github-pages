@@ -82,7 +82,8 @@ object FileF {
             getAllSubDirs(restDirs, dirFilter, acc)
       }
 
-    effectOf(getAllSubDirs(Vector(rootDir), dirFilter, Vector.empty).asRight[FileError])
+    effectOf(getAllSubDirs(Vector(rootDir), dirFilter, Vector.empty))
+      .catchNonFatal(FileError.fromNonFatal)
   }
 
   def readBytesFromFile[F[_]: Fx: Monad: MCancel](

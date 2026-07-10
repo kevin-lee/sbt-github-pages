@@ -61,13 +61,9 @@ object GitHubPagesPlugin extends AutoPlugin {
         siteDir.siteDir,
         dirFilter = dirFilter
       )
-    ).leftMap {
-      // FIXME: The left type here is FileError, which is not a Throwable, so `NonFatal` can never
-      //  match and this would throw a MatchError. It is unreachable today only because
-      //  FileF.getAllDirsRecursively always returns a Right.
-      case NonFatal(err) =>
-        GitHubError.nonFatalThrowable("Error fetching files recursively", err)
-    }.flatMap {
+    ).leftMap(
+      GitHubError.fileHandling("Fetching files recursively")(_)
+    ).flatMap {
       case Vector() =>
         pureOf(
           GitHubError
