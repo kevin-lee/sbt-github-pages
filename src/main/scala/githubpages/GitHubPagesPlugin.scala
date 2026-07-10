@@ -13,10 +13,11 @@ import githubpages.github.{Data, GitHubApi, GitHubError}
 import loggerf.core.Log as LogF
 import loggerf.logger.*
 import loggerf.syntax.all.*
-import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
+import org.http4s.ember.client.EmberClientBuilder
 import sbt.Keys.{sLog, streams}
 import sbt.{IO as SbtIo, *}
+import sbtcompat.PluginCompat.*
 
 import scala.util.control.NonFatal
 
@@ -61,6 +62,9 @@ object GitHubPagesPlugin extends AutoPlugin {
         dirFilter = dirFilter
       )
     ).leftMap {
+      // FIXME: The left type here is FileError, which is not a Throwable, so `NonFatal` can never
+      //  match and this would throw a MatchError. It is unreachable today only because
+      //  FileF.getAllDirsRecursively always returns a Right.
       case NonFatal(err) =>
         GitHubError.nonFatalThrowable("Error fetching files recursively", err)
     }.flatMap {
@@ -125,16 +129,16 @@ object GitHubPagesPlugin extends AutoPlugin {
 
   private lazy val forcePushStr = sys.env.getOrElse("GITHUB_PAGES_PUBLISH_FORCE_PUSH", "")
 
-  override lazy val globalSettings: Seq[Def.Setting[_]] = Seq(
+  override lazy val globalSettings: Seq[Def.Setting[?]] = Seq(
     gitHubPagesBranch               := "gh-pages",
     gitHubPagesNoJekyll             := true,
     gitHubPagesPublishCommitMessage :=
       sys.env.getOrElse("GITHUB_PAGES_PUBLISH_COMMIT_MESSAGE", s"Updated ${gitHubPagesBranch.value}"),
     gitHubPagesPublishForcePush     :=
-      forcePushStr == "1" || forcePushStr.equalsIgnoreCase("true")
+      forcePushStr === "1" || forcePushStr.equalsIgnoreCase("true")
   )
 
-  override lazy val projectSettings: Seq[Def.Setting[_]] = Seq(
+  override lazy val projectSettings: Seq[Def.Setting[?]] = Seq(
     gitHubPagesGitHubBaseUrl      := sys.env.getOrElse("GITHUB_ENT_BASE_URL", GitHubApiConfig.default.baseUrl.baseUrl),
     gitHubPagesGitHubAuthorizeUrl := sys
       .env
@@ -157,14 +161,14 @@ object GitHubPagesPlugin extends AutoPlugin {
     gitHubPagesOrgName                                    := gitRemoteInfo._1,
     gitHubPagesRepoName                                   := gitRemoteInfo._2,
     gitHubPagesPublishRequestTimeout                      := DefaultGitHubPagesPublishRequestTimeout,
-    gitHubPagesBranchExists                               := {
+    gitHubPagesBranchExists                               := Def.uncached {
       val gitHubPagesBranchValue     = gitHubPagesBranch.value
       import sys.process.*
       val doesGitHubPagesBranchExist =
         s"git ls-remote --exit-code --heads origin $gitHubPagesBranchValue >/dev/null 2>&1;".! === 0
       doesGitHubPagesBranchExist
     },
-    gitHubPagesGetCurrentBranch                           := {
+    gitHubPagesGetCurrentBranch                           := Def.uncached {
       import sys.process.*
       val currentBranch =
         sys
@@ -179,14 +183,14 @@ object GitHubPagesPlugin extends AutoPlugin {
       currentBranch
     },
     gitHubPagesUseGithubTokenForGitHubPagesBranchCreation := true,
-    gitHubPagesCreateGitHubPagesBranchIfNotExist          := {
+    gitHubPagesCreateGitHubPagesBranchIfNotExist          := Def.uncached {
       val logger        = sLog.value
       val ghPagesBranch = gitHubPagesBranch.value
       val currentBranch = gitHubPagesGetCurrentBranch.value
 
       val useGhToken = gitHubPagesUseGithubTokenForGitHubPagesBranchCreation.value
 
-      val orgName = gitHubPagesOrgName.value
+      val orgName  = gitHubPagesOrgName.value
       val repoName = gitHubPagesRepoName.value
 
       if (gitHubPagesBranchExists.value) {
@@ -294,14 +298,14 @@ object GitHubPagesPlugin extends AutoPlugin {
       }
 
     },
-    publishToGitHubPages := Def.taskDyn {
+    publishToGitHubPages                                  := Def.uncached(Def.taskDyn {
       val gitHubPagesPublishBranch = Data.GitHubPagesBranch(gitHubPagesBranch.value)
 
       val siteDir        = Data.SiteDir(gitHubPagesSiteDir.value)
       val noJekyll       = gitHubPagesNoJekyll.value
       val gitHubRepoOrg  = Data.GitHubRepo.Org(gitHubPagesOrgName.value)
       val gitHubRepoRepo = Data.GitHubRepo.Repo(gitHubPagesRepoName.value)
-      val gitHubToken    = gitHubPagesGitHubToken.value.map(Data.GitHubRepoWithAuth.AccessToken)
+      val gitHubToken    = gitHubPagesGitHubToken.value.map(Data.GitHubRepoWithAuth.AccessToken.apply)
       val commitMessage  = Data.CommitMessage(gitHubPagesPublishCommitMessage.value)
       val dirsToIgnore   = gitHubPagesDirsToIgnore.value
       val ignoreDotDirs  = gitHubPagesIgnoreDotDirs.value
@@ -327,7 +331,7 @@ object GitHubPagesPlugin extends AutoPlugin {
       import cats.effect.unsafe.implicits.global
       import effectie.instances.ce3.fx.ioFx
 
-      implicit val log: CanLog = SbtLogger.sbtLoggerCanLog(streams.value.log)
+      implicit val log: CanLog = new SbtLogger(streams.value.log)
 
       if (gitHubToken.nonEmpty) {
         val requestTimeout           = gitHubPagesPublishRequestTimeout.value
@@ -345,9 +349,10 @@ object GitHubPagesPlugin extends AutoPlugin {
                                )
                              )
             result        <-
-              BlazeClientBuilder[IO]
-                .withRequestTimeout(requestTimeout)
-                .resource
+              EmberClientBuilder
+                .default[IO]
+                .withTimeout(requestTimeout)
+                .build
                 .use { client =>
                   (for {
                     gitHubRepo       <-
@@ -416,7 +421,7 @@ object GitHubPagesPlugin extends AutoPlugin {
           )
         )
       }
-    }.value
+    }.value)
   )
 
   /** Gets the Github user and repository from the git remote info */
