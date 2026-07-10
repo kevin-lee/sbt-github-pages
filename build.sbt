@@ -23,7 +23,7 @@ ThisBuild / startYear := 2020.some
 Global / sbtVersion := props.GlobalSbtVersion
 
 lazy val root = (project in file("."))
-  .enablePlugins(SbtPlugin, DevOopsGitHubReleasePlugin, DocusaurPlugin)
+  .enablePlugins(SbtPlugin, DevOopsGitHubReleasePlugin)
   .settings(
     name                          := props.ProjectName,
     description                   := "sbt plugin to publish GitHub Pages",
@@ -43,11 +43,6 @@ lazy val root = (project in file("."))
     publishMavenStyle := true,
     licenses          := List("MIT" -> url("http://opensource.org/licenses/MIT")),
     /* } Publish */
-
-    /* Docs { */
-    docusaurDir      := (ThisBuild / baseDirectory).value / "website",
-    docusaurBuildDir := docusaurDir.value / "build",
-    /* } Docs */
 
   )
 
