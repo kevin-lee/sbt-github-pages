@@ -5,7 +5,7 @@ set -x
 # Build + test for the given Scala version / sbt series.
 #
 # Scala 2.12 -> sbt 1.x, Scala 3 -> sbt 2.x (see `pluginCrossBuild / sbtVersion` in build.sbt).
-# `+` is never used because the two axes need different JDKs: the Scala 3.8.4 compiler is
+# `+` is not used for the Java 11 test lane: the Scala 3.9 compiler is
 # compiled for Java 17 and will not run on Java 11.
 #
 # Usage: sbt-build.sh <scala-version> <sbt-series: sbt1|sbt2>

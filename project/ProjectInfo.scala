@@ -19,8 +19,8 @@ object ProjectInfo {
 
     val Org = "io.kevinlee"
 
-    val ProjectScalaVersion  = "2.12.20"
-    val ProjectScala3Version = "3.8.4"
+    val ProjectScalaVersion  = "2.12.21"
+    val ProjectScala3Version = "3.9.0"
 
     val CrossScalaVersions: Seq[String] = Seq(ProjectScalaVersion, ProjectScala3Version).distinct
 
@@ -31,7 +31,7 @@ object ProjectInfo {
      * Sbt1Version is also the minimum sbt 1 version this plugin supports.
      */
     val Sbt1Version = "1.11.2"
-    val Sbt2Version = "2.0.1"
+    val Sbt2Version = "2.1.0"
 
     val Sbt2CompatVersion = "0.2.0"
 
