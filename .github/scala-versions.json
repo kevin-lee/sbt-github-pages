@@ -1,4 +1,8 @@
 [
-  { "name": "Scala 2 (sbt 1)", "version": "2.12.20", "binary-version": "2.12", "sbt-series": "sbt1", "java-version": "11", "java-distribution": "temurin" },
-  { "name": "Scala 3 (sbt 2)", "version": "3.8.4",   "binary-version": "3",    "sbt-series": "sbt2", "java-version": "17", "java-distribution": "temurin" }
+  { "name": "Scala 2 (sbt 1)", "version": "2.12.21", "binary-version": "2.12", "sbt-series": "sbt1", "java-version": "11", "java-distribution": "temurin" },
+  { "name": "Scala 3 (sbt 2)", "version": "3.9.0", "binary-version": "3", "sbt-series": "sbt2", "java-version": "17", "java-distribution": "temurin" },
+  { "name": "Scala 2 (sbt 1)", "version": "2.12.21", "binary-version": "2.12", "sbt-series": "sbt1", "java-version": "21", "java-distribution": "temurin" },
+  { "name": "Scala 3 (sbt 2)", "version": "3.9.0", "binary-version": "3", "sbt-series": "sbt2", "java-version": "21", "java-distribution": "temurin" },
+  { "name": "Scala 2 (sbt 1)", "version": "2.12.21", "binary-version": "2.12", "sbt-series": "sbt1", "java-version": "25", "java-distribution": "temurin" },
+  { "name": "Scala 3 (sbt 2)", "version": "3.9.0", "binary-version": "3", "sbt-series": "sbt2", "java-version": "25", "java-distribution": "temurin" }
 ]
