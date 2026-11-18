@@ -1,6 +1,7 @@
 name: Build All
 
 on:
+  pull_request:
   push:
     branches-ignore:
       - publish-docs
